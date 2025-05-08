@@ -29,7 +29,7 @@ Créer une application Java :
 git init
 
 # 2. Lier le dépôt distant
-git remote add origin https://github.com/VOTRE_COMPTE/VOTRE_DEPOT.git
+git remote add origin https://github.com/GhaSad/CYFamTree
 
 # 3. Récupérer les fichiers distants
 git pull origin main --allow-unrelated-histories
