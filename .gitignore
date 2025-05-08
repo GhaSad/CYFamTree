@@ -1,20 +1,21 @@
-# Eclipse
+# === Java ===
+*.class
+*.log
+
+# === Maven ===
+target/
+dependency-reduced-pom.xml
+
+# === Eclipse ===
 .classpath
 .project
 .settings/
 
-# Build
-bin/
-target/
-
-# Logs
-*.log
-
-# OS
+# === OS ===
 .DS_Store
 Thumbs.db
 
-# IDEs
+# === IDEs ===
 .idea/
 *.iml
 .vscode/
