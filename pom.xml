@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.cytech.genealogie</groupId>
+  <artifactId>arbre-genealogique-pro</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Arbre Généalogique Pro++</name>
+  <description>Java project for building and managing family trees with console and graphical interfaces.</description>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <release>17</release>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!-- JUnit 5 -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- (Optionnel) JavaFX -->
+    <!--
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>21</version>
+    </dependency>
+    -->
+  </dependencies>
+</project>
