@@ -80,9 +80,8 @@ ArbreGenealogiquePro/
 
 ## ✍️ Auteur
 
-Projet réalisé par l'équipe [CYTech GI ING1], année 2024-2025  
+Projet réalisé par l'équipe 26 , année 2024-2025  
 Encadré par Zaouche Djaouida  
-Dépôt GitHub : [https://github.com/GhaSad/CYFamTree](https://github.com/GhaSad/CYFamTree)
 
 ---
 
