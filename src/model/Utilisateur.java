@@ -2,7 +2,7 @@ package model;
 
 import java.util.Date;
 
-public class Utilisateur extends Personne {
+public class Utilisateur {
     private Boolean estInscrit;
 
     public Utilisateur(String nom, String prenom, Date dateNaissance, Nationalite nationalite, int age, Boolean estInscrit){
