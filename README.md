@@ -44,7 +44,7 @@ git push --set-upstream origin main
 
 > Remplacez `main` par `master` si nécessaire.
 
-### Authentification GitHub
+### controller.Authentification GitHub
 
 ⚠️ GitHub ne permet plus l’authentification par mot de passe. Utilisez un **Personal Access Token (PAT)** comme mot de passe.  
 Générez-le ici : [https://github.com/settings/tokens](https://github.com/settings/tokens)
@@ -58,7 +58,7 @@ ArbreGenealogiquePro/
 ├── pom.xml                   # Fichier Maven (Java 17, dépendances)
 ├── .gitignore                # À ajouter : ignore les fichiers Eclipse et Maven
 ├── src/
-│   ├── model/                # Entités métier : Personne, Utilisateur, Arbre, etc.
+│   ├── model/                # Entités métier : Personne, model.Utilisateur, Arbre, etc.
 │   ├── view/                 # Interfaces console et graphiques
 │   ├── controller/           # Logique d'application (actions utilisateurs)
 │   ├── utils/                # Outils divers (validateurs, règles métier)
