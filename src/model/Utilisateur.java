@@ -2,7 +2,7 @@ package model;
 
 import java.util.Date;
 
-public class Utilisateur {
+public class Utilisateur extends Personne {
     private Boolean estInscrit;
 
     public Utilisateur(String nom, String prenom, Date dateNaissance, Nationalite nationalite, int age, Boolean estInscrit){
@@ -11,22 +11,24 @@ public class Utilisateur {
     }
 
     public void modifierCoordonnées(){
-
+        //Ici ça serait bien qu'on puisse gérer un onglet profil ou l'utilisateur pourrait gérer ses coordonnées
     }
 
     public ArbreGenealogique consulterArbre(){
+
         return null;
     }
 
     public String lienParente(Utilisateur utilisateur){
+
         return null;
     }
 
-    public void ajouterLien(Utilisateur utilisateur){
+    public void ajouterLien(Utilisateur utilisateur, TypeLien typeLien){
 
     }
 
-    public void modifierLien(Utilisateur utilisateur){
+    public void modifierLien(Utilisateur utilisateur, TypeLien typeLien){
 
     }
 

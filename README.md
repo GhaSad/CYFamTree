@@ -58,7 +58,7 @@ ArbreGenealogiquePro/
 ├── pom.xml                   # Fichier Maven (Java 17, dépendances)
 ├── .gitignore                # À ajouter : ignore les fichiers Eclipse et Maven
 ├── src/
-│   ├── model/                # Entités métier : Personne, model.Utilisateur, Arbre, etc.
+│   ├── model/                # Entités métier : model.Personne, model.Utilisateur, Arbre, etc.
 │   ├── view/                 # Interfaces console et graphiques
 │   ├── controller/           # Logique d'application (actions utilisateurs)
 │   ├── utils/                # Outils divers (validateurs, règles métier)
