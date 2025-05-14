@@ -3,6 +3,9 @@ package model;
 public enum TypeLien {
     PERE("Père"),
     MERE("Mère"),
+    FILS("Fils"),
+    FILLE("FILLE"),
+    ENFANT("Enfant"),
     SOEUR("Soeur"),
     FRERE("Frère"),
     TANTE("Tante"),

@@ -11,42 +11,76 @@ public class Personne {
     private LocalDate dateNaissance;
     private Nationalite nationalite;
     private int Age;
-    private List<TypeLien> lien;
+    private List<Lien> liens;
 
-    public Personne(String nom, String prenom, LocalDate dateNaissance2, Nationalite nationalite, int age) {
+    public Personne(String nom, String prenom, LocalDate date, Nationalite nationalite, int age) {
         this.id = ++compteurId;
     	this.nom = nom;
         this.prenom = prenom;
-        this.dateNaissance = dateNaissance2;
+        this.dateNaissance = date;
         this.nationalite = nationalite;
         this.Age = age;
-        lien = new ArrayList<>();
+        liens = new ArrayList<>();
+    }
+    public String getPrenom() {
+    	return prenom;
+    }
+    public String getNom() {
+    	return nom;
     }
 
-    public void ajouterLien(Personne p, Lien TypeLien){
-
+    public void creerLien(Personne autre, TypeLien type) {
+        Lien lien = new Lien(autre, type);
+        liens.add(lien);
     }
 
-    public List<Personne> getParents(){
-
-        return null;
+    public List<Lien> getLiens() {
+        return liens;
     }
 
-    public List<Personne> getEnfants(){
-
-        return null;
+    public List<Personne> getParents() {
+        List<Personne> parents = new ArrayList<>();
+        for (Lien lien : liens) {
+            if (lien.getTypeLien() == TypeLien.PERE || lien.getTypeLien() == TypeLien.MERE) {
+                parents.add(lien.getPersonneLiee());
+            }
+        }
+        return parents;
     }
 
-    public List<Personne> getFreres(){
-
-        return null;
+    public List<Personne> getEnfants() {
+        List<Personne> enfants = new ArrayList<>();
+        for (Lien lien : liens) {
+            if (lien.getTypeLien() == TypeLien.FILS || lien.getTypeLien() == TypeLien.FILLE) {
+                enfants.add(lien.getPersonneLiee());
+            }
+        }
+        return enfants;
     }
 
-    public List<Personne> getSoeurs(){
-
-        return null;
+    public List<Personne> getFreres() {
+        List<Personne> freres = new ArrayList<>();
+        for (Lien lien : liens) {
+            if (lien.getTypeLien() == TypeLien.FRERE) {
+                freres.add(lien.getPersonneLiee());
+            }
+        }
+        return freres;
     }
 
+    public List<Personne> getSoeurs() {
+        List<Personne> soeurs = new ArrayList<>();
+        for (Lien lien : liens) {
+            if (lien.getTypeLien() == TypeLien.SOEUR) {
+                soeurs.add(lien.getPersonneLiee());
+            }
+        }
+        return soeurs;
+    }
+    
+    
+    
+    
     public void modifierDetails(){
 
     }
