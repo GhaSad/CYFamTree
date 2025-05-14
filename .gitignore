@@ -2,6 +2,9 @@
 *.class
 *.log
 
+# Ignore le dossier de tests
+src/tests/
+
 # === Maven ===
 target/
 dependency-reduced-pom.xml
