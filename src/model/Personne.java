@@ -1,22 +1,25 @@
 package model;
 
+import java.time.LocalDate;
 import java.util.*;
 
+
 public class Personne {
-    private int id = 0;
+	private static int compteurId = 0;
+    private int id;
     private String nom, prenom;
-    private Date dateNaissance;
+    private LocalDate dateNaissance;
     private Nationalite nationalite;
     private int Age;
     private List<TypeLien> lien;
 
-    public Personne(String nom, String prenom, Date dateNaissance, Nationalite nationalite, int age) {
-        this.nom = nom;
+    public Personne(String nom, String prenom, LocalDate dateNaissance2, Nationalite nationalite, int age) {
+        this.id = ++compteurId;
+    	this.nom = nom;
         this.prenom = prenom;
-        this.dateNaissance = dateNaissance;
+        this.dateNaissance = dateNaissance2;
         this.nationalite = nationalite;
         this.Age = age;
-        id += 1;
         lien = new ArrayList<>();
     }
 
@@ -50,5 +53,9 @@ public class Personne {
 
     public void supprimer(){
 
+    }
+    @Override
+    public String toString() {
+    	return "ID : " +id + " Nom : " + nom + " Prenom ; " + prenom + " Date : " +dateNaissance + "";
     }
 }

@@ -1,8 +1,11 @@
 package controller;
+import java.util.*;
 
 public class Authentification {
     private int codePrive;
     private String mdp;
+    private int codePublic;
+    private Date dateDerniereConnexion;
 
     public Authentification(int codePrive, String mdp) {
         this.codePrive = codePrive;
