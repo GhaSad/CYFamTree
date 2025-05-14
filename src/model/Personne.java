@@ -22,13 +22,35 @@ public class Personne {
         this.Age = age;
         liens = new ArrayList<>();
     }
+    
+    
+    public int getId() {
+        return id;
+    }
+
+    public LocalDate getDateNaissance() {
+        return dateNaissance;
+    }
+
+    public Nationalite getNationalite() {
+        return nationalite;
+    }
+
+    public int getAge() {
+        return Age;
+    }
+    
     public String getPrenom() {
     	return prenom;
     }
+    
     public String getNom() {
     	return nom;
     }
 
+    
+    
+    
     public void creerLien(Personne autre, TypeLien type) {
         Lien lien = new Lien(autre, type);
         liens.add(lien);
@@ -79,15 +101,23 @@ public class Personne {
     }
     
     
-    
-    
     public void modifierDetails(){
 
     }
 
-    public void supprimer(){
+    public void supprimer(List<Personne> toutesLesPersonnes) {
+        this.liens.clear();
 
+        for (Personne autre : toutesLesPersonnes) {
+            if (autre != this) {
+                autre.liens.removeIf(lien -> lien.getPersonneLiee().equals(this));
+            }
+        }
     }
+    
+    
+    
+    
     @Override
     public String toString() {
     	return "ID : " +id + " Nom : " + nom + " Prenom ; " + prenom + " Date : " +dateNaissance + "";
