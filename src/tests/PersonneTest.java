@@ -1,70 +1,60 @@
 package tests;
+
 import model.*;
+import javax.swing.*;
 import java.time.LocalDate;
-import java.util.*;
-
-
-
-
 
 public class PersonneTest {
-	public static void main(String[] args) {
-		
-		LocalDate dateNaissance = LocalDate.of(2003, 10, 24);
-        Personne parent = new Personne("Guillarme", "Arno", dateNaissance, Nationalite.FRANCAIS, 29);
-        Personne enfant = new Personne("Martin", "Julie", LocalDate.of(1970, 3, 2), Nationalite.FRANCAIS, 54);
+    public static void main(String[] args) {
+        // Création de l'authentification avec des utilisateurs par défaut
+        Authentification auth = new Authentification();
+
+        String loginTest = "alice";
+        String mdpTest = "password123";
+
+        Utilisateur user = auth.authentifier(loginTest, mdpTest);
+
+        if (user == null) {
+            System.out.println("Échec de la connexion pour " + loginTest);
+            return;
+        }
+
+        System.out.println("Connexion réussie : " + user.getPrenom() + " " + user.getNom());
+
+        // Création des personnes (tu peux adapter ou ajouter plus)
+        Personne parent = new Personne("Guillarme", "Arno", LocalDate.of(1970, 10, 24), Nationalite.FRANCAIS, 54);
+        Personne enfant = new Personne("Martin", "Julie", LocalDate.of(2003, 3, 2), Nationalite.FRANCAIS, 29);
         Personne frere = new Personne("Dupont", "Jean", LocalDate.of(2010, 8, 22), Nationalite.FRANCAIS, 13);
-        
-        parent.creerLien(enfant, TypeLien.FILLE);
-        enfant.creerLien(parent, TypeLien.PERE);
-        enfant.creerLien(frere, TypeLien.FRERE);
-        frere.creerLien(parent, TypeLien.PERE);
-        frere.creerLien(enfant, TypeLien.FRERE);
 
-        // Création des Noeuds associés
-        Noeud noeud1 = new Noeud(parent);
-        Noeud noeud2 = new Noeud(enfant);
-        Noeud noeud3 = new Noeud(frere);
-        
-        System.out.println("Liens de Arno :");
-        afficherLiens(parent.getLiens());
-        System.out.println(parent.getEnfants());
-        
+        // Création des noeuds
+        Noeud noeudParent = new Noeud(parent);
+        Noeud noeudEnfant = new Noeud(enfant);
+        Noeud noeudFrere = new Noeud(frere);
 
-        System.out.println("\nLiens de Julie :");
-        afficherLiens(enfant.getLiens());
-        System.out.println(enfant.getFreres());
+        // Relations parents-enfants
+        noeudParent.ajouterEnfant(noeudEnfant);
+        noeudParent.ajouterEnfant(noeudFrere);
 
-        System.out.println("\nLiens de Jean :");
-        afficherLiens(frere.getLiens());
-        System.out.println(frere.getParents());
-        
-        
+        // Création de l'arbre généalogique avec racine parent
+        ArbreGenealogique arbre = new ArbreGenealogique(user, parent);
+        arbre.ajouterNoeud(noeudParent);
+        arbre.ajouterNoeud(noeudEnfant);
+        arbre.ajouterNoeud(noeudFrere);
 
-        // Changement de visibilité
-        noeud1.changerVisibilite(Visibilite.PUBLIC);
-        noeud2.changerVisibilite(Visibilite.PRIVATE);
+        // Affichage texte
+        arbre.afficherTexte();
 
-        // Ajout de parents et enfants (implémentation fictive ici)
-        //noeud1.ajouterParent(p2);       // p2 est le parent de p1
-        //noeud1.ajouterEnfant(noeud3);   // p3 est l'enfant de p1
+        // Affichage graphique classique
+        arbre.afficherGraphique();
 
-        System.out.println("Tests terminés pour Noeud.");
-    }
-	
-	private static void afficherLiens(List<Lien> liens) {
-        for (Lien lien : liens) {
-            System.out.println("- " + lien.getTypeLien() + " : " +
-                    lien.getPersonneLiee().getPrenom() + " " + lien.getPersonneLiee().getNom());
-        }
-    }
-
-    private static boolean contientLien(List<Lien> liens, Personne personne, TypeLien type) {
-        for (Lien lien : liens) {
-            if (lien.getPersonneLiee().equals(personne) && lien.getTypeLien() == type) {
-                return true;
-            }
-        }
-        return false;
+        // Affichage graphique personnalisé
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Arbre Généalogique Custom");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.add(new ArbrePanel(arbre));
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 }

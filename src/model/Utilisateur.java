@@ -36,6 +36,10 @@ public class Utilisateur extends Personne {
 
         return null;
     }
+    public Boolean getEstInscrit() {
+        return estInscrit;
+    }
+
 
 
 }
