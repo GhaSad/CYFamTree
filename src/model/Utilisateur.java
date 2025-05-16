@@ -3,43 +3,37 @@ package model;
 import java.time.LocalDate;
 
 public class Utilisateur extends Personne {
+    private String login;           // <-- ajout
     private Boolean estInscrit;
+    private Boolean estValide;
 
-    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, Boolean estInscrit){
+    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, Boolean estInscrit, Boolean estValide){
         super(nom, prenom, dateNaissance, nationalite, age);
         this.estInscrit = estInscrit;
+        this.estValide = estValide;
     }
 
-    public void modifierCoordonnées(){
-        //Ici ça serait bien qu'on puisse gérer un onglet profil ou l'utilisateur pourrait gérer ses coordonnées
+    public String getLogin() {
+        return login;
     }
 
-    public ArbreGenealogique consulterArbre(){
-
-        return null;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
-    public String lienParente(Utilisateur utilisateur){
-
-        return null;
+    public int getAge() {
+        return LocalDate.now().getYear() - getDateNaissance().getYear();
     }
 
-    public void ajouterLien(Utilisateur utilisateur, TypeLien typeLien){
-
-    }
-
-    public void modifierLien(Utilisateur utilisateur, TypeLien typeLien){
-
-    }
-
-    public Boolean confirmerLien(){
-
-        return null;
-    }
     public Boolean getEstInscrit() {
         return estInscrit;
     }
 
+    public Boolean getEstValide() {
+        return estValide;
+    }
 
-
+    public void setEstValide(Boolean estValide) {
+        this.estValide = estValide;
+    }
 }

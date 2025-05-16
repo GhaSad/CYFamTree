@@ -1,53 +1,84 @@
 package model;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UtilisateurDAO {
 
-    public Utilisateur findByLogin(String login) {
-        String sql = "SELECT * FROM utilisateur WHERE login = ?";
+public List<Utilisateur> findAllEnAttenteValidation() {
+    List<Utilisateur> utilisateurs = new ArrayList<>();
+    String sql = "SELECT * FROM utilisateur WHERE est_valide = 0";
+    try (Connection conn = Database.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql);
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            Utilisateur u = new Utilisateur(
+                rs.getString("nom"),
+                rs.getString("prenom"),
+                LocalDate.parse(rs.getString("date_naissance")),
+                Nationalite.valueOf(rs.getString("nationalite")),
+                0,
+                rs.getInt("est_inscrit") == 1,
+                rs.getInt("est_valide") == 1
+            );
+            u.setLogin(rs.getString("login"));  // Récupération du login ici
+            utilisateurs.add(u);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return utilisateurs;
+}
+
+
+public List<Utilisateur> findAll() {
+    List<Utilisateur> utilisateurs = new ArrayList<>();
+    String sql = "SELECT * FROM utilisateur";  // récupère tous, car supprimés ont disparu
+    try (Connection conn = Database.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql);
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            Utilisateur u = new Utilisateur(
+                rs.getString("nom"),
+                rs.getString("prenom"),
+                LocalDate.parse(rs.getString("date_naissance")),
+                Nationalite.valueOf(rs.getString("nationalite")),
+                0,
+                rs.getInt("est_inscrit") == 1,
+                rs.getInt("est_valide") == 1
+            );
+            u.setLogin(rs.getString("login"));
+            utilisateurs.add(u);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return utilisateurs;
+}
+
+
+
+    public void validerUtilisateur(String login) {
+        String sql = "UPDATE utilisateur SET est_valide = 1, est_inscrit = 1 WHERE login = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, login);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return new Utilisateur(
-                    rs.getString("nom"),
-                    rs.getString("prenom"),
-                    java.time.LocalDate.parse(rs.getString("date_naissance")),
-                    Nationalite.valueOf(rs.getString("nationalite")),
-                    0, // age à calculer
-                    rs.getInt("est_inscrit") == 1
-                );
-            }
-
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
-    public void save(Utilisateur utilisateur, String login, String motDePasse) {
-        String sql = "INSERT INTO utilisateur(login, mot_de_passe, nom, prenom, date_naissance, nationalite, est_inscrit) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public void supprimerUtilisateur(String login) {
+        String sql = "DELETE FROM utilisateur WHERE login = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, login);
-            pstmt.setString(2, motDePasse);  // à hasher en prod
-            pstmt.setString(3, utilisateur.getNom());
-            pstmt.setString(4, utilisateur.getPrenom());
-            pstmt.setString(5, utilisateur.getDateNaissance().toString());
-            pstmt.setString(6, utilisateur.getNationalite().name());
-            pstmt.setInt(7, utilisateur.estInscrit ? 1 : 0);
-
             pstmt.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
