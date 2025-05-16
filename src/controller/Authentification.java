@@ -2,18 +2,18 @@ package controller;
 import java.util.*;
 
 public class Authentification {
-    private int codePrive;
+    private final String email;
     private String mdp;
     private int codePublic;
     private Date dateDerniereConnexion;
 
-    public Authentification(int codePrive, String mdp) {
-        this.codePrive = codePrive;
+    public Authentification(String email, String mdp) {
+        this.email = email;
         this.mdp = mdp;
     }
 
-    public Boolean VerifierConnexion(int codePrive, String mdp) {
-        return this.codePrive == codePrive && this.mdp.equals(mdp);
+    public Boolean VerifierConnexion(String email, String mdp) {
+        return this.email.equals(email)  && this.mdp.equals(mdp);
     }
 
     public void réinitialiserMDP(String mdp) {
