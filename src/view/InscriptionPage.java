@@ -1,4 +1,6 @@
-package model;
+package view;
+import model.*;
+import dao.*;
 
 import javax.swing.*;
 import java.awt.*;

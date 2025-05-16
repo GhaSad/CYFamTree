@@ -1,7 +1,8 @@
-package model;
+package view;
 
 import model.Utilisateur;
-import model.UtilisateurDAO;
+
+import dao.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

@@ -1,6 +1,11 @@
-package model;
+package view;
 
 import model.*;
+import dao.*;
+
+import tests.*;
+import view.AccueilUtilisateur;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -76,7 +81,8 @@ if (utilisateur == null) {
     // Connexion réussie et validée
     JOptionPane.showMessageDialog(frame, "Connexion réussie ! Bienvenue " + utilisateur.getPrenom());
     frame.dispose();
-    ouvrirArbre(utilisateur);  // ou autre action après connexion
+    new AccueilUtilisateur(utilisateur);
+
 }
 
             }

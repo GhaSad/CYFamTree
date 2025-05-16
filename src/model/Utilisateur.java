@@ -6,6 +6,8 @@ public class Utilisateur extends Personne {
     private String login;           // <-- ajout
     private Boolean estInscrit;
     private Boolean estValide;
+    private ArbreGenealogique arbre;
+
 
     public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, Boolean estInscrit, Boolean estValide){
         super(nom, prenom, dateNaissance, nationalite, age);
@@ -36,4 +38,12 @@ public class Utilisateur extends Personne {
     public void setEstValide(Boolean estValide) {
         this.estValide = estValide;
     }
+    public ArbreGenealogique getArbre() {
+        return arbre;
+    }
+
+    public void setArbre(ArbreGenealogique arbre) {
+        this.arbre = arbre;
+    }
+
 }

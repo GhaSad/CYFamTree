@@ -1,6 +1,7 @@
 package tests;
 
 import model.*;
+import view.*;
 
 
 import javax.swing.SwingUtilities;
@@ -11,6 +12,7 @@ public class PersonneTest {
         SwingUtilities.invokeLater(() -> {
             AccueilPage accueil = new AccueilPage();
             accueil.show();
+
         });
     }
 }
