@@ -1,68 +1,80 @@
 package view;
 
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import model.*;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+public class AccueilUtilisateur extends Application {
 
-public class AccueilUtilisateur {
-    private JFrame frame;
+    private static Utilisateur utilisateurStatic; // stockage temporaire
     private Utilisateur utilisateur;
+    private Stage primaryStage;
 
-    public AccueilUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
-        initialize();
+    public AccueilUtilisateur() {
+        // Constructeur par défaut requis par JavaFX
     }
 
-    private void initialize() {
-        frame = new JFrame("Accueil - Arbre Généalogique");
-        frame.setBounds(100, 100, 400, 250);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(new BorderLayout());
+    @Override
+    public void start(Stage stage) throws Exception {
+        this.primaryStage = stage;
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // ✅ récupération de l'utilisateur passé via méthode statique
+        this.utilisateur = utilisateurStatic;
 
-        JLabel bienvenue = new JLabel("Bienvenue, " + utilisateur.getPrenom() + " !");
-        bienvenue.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(bienvenue);
+        if (utilisateur == null) {
+            throw new IllegalStateException("Aucun utilisateur fourni à AccueilUtilisateur");
+        }
 
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
+        stage.setTitle("Accueil - Arbre Généalogique");
+
+        VBox root = new VBox();
+        root.setSpacing(20);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label bienvenue = new Label("Bienvenue, " + utilisateur.getPrenom() + " !");
+        root.getChildren().add(bienvenue);
 
         if (utilisateur.getArbre() == null) {
-            JLabel info = new JLabel("Vous n'avez pas encore d'arbre généalogique.");
-            info.setAlignmentX(Component.CENTER_ALIGNMENT);
-            panel.add(info);
+            Label info = new Label("Vous n'avez pas encore d'arbre généalogique.");
+            Button creerBtn = new Button("Créer mon arbre");
 
-            JButton creerBtn = new JButton("Créer mon arbre");
-            creerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            creerBtn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    ArbreGenealogique arbre = new ArbreGenealogique(utilisateur, utilisateur);
-                    Noeud racine = new Noeud(utilisateur);
-                    arbre.ajouterNoeud(racine);
-                    utilisateur.setArbre(arbre);
+            creerBtn.setOnAction(e -> {
+                ArbreGenealogique arbre = new ArbreGenealogique(utilisateur, utilisateur);
+                Noeud racine = new Noeud(utilisateur);
+                arbre.ajouterNoeud(racine);
+                utilisateur.setArbre(arbre);
 
-                    frame.dispose();
-                    arbre.afficherGraphique();
-                }
+                primaryStage.close();
+                arbre.afficherGraphique();  // À adapter si besoin
             });
-            panel.add(Box.createRigidArea(new Dimension(0, 10)));
-            panel.add(creerBtn);
-        } else {
-            JLabel info = new JLabel("Chargement de votre arbre généalogique...");
-            info.setAlignmentX(Component.CENTER_ALIGNMENT);
-            panel.add(info);
 
-            frame.dispose();
-            utilisateur.getArbre().afficherGraphique();
+            root.getChildren().addAll(info, creerBtn);
+
+        } else {
+            Label info = new Label("Chargement de votre arbre généalogique...");
+            root.getChildren().add(info);
+
+            primaryStage.close();
+            utilisateur.getArbre().afficherGraphique();  // À adapter si besoin
             return;
         }
 
-        frame.getContentPane().add(panel, BorderLayout.CENTER);
-        frame.setVisible(true);
+        Scene scene = new Scene(root, 400, 250);
+        stage.setScene(scene);
+        stage.centerOnScreen();
+        stage.show();
+    }
+
+    // ✅ Méthode statique pour lancer l'écran avec un utilisateur
+    public static void show(Utilisateur utilisateur) {
+        utilisateurStatic = utilisateur;
+        launch();  // Appelle start() via le constructeur par défaut
     }
 }

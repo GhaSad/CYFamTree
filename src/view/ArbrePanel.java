@@ -1,41 +1,66 @@
 package view;
+
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+
 import model.*;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
+public class ArbrePanel extends Pane {
 
-public class ArbrePanel extends JPanel {
     private ArbreGenealogique arbre;
+
     private int boxWidth = 140;
     private int boxHeight = 50;
     private int verticalSpacing = 100;
     private int horizontalSpacing = 40;
-    private Map<Personne, Rectangle> positions = new HashMap<>();
+
+    private Map<Personne, javafx.geometry.Rectangle2D> positions = new HashMap<>();
+
+    private Canvas canvas;
 
     public ArbrePanel(ArbreGenealogique arbre) {
         this.arbre = arbre;
-        setPreferredSize(new Dimension(1000, 700));
-        setBackground(Color.WHITE);
+        this.setPrefSize(1000, 700);
+
+        canvas = new Canvas(getPrefWidth(), getPrefHeight());
+        this.getChildren().add(canvas);
+
+        // Redessiner quand la taille change
+        widthProperty().addListener((obs, oldVal, newVal) -> redraw());
+        heightProperty().addListener((obs, oldVal, newVal) -> redraw());
+
+        redraw();
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    private void redraw() {
+        double width = getWidth() > 0 ? getWidth() : getPrefWidth();
+        double height = getHeight() > 0 ? getHeight() : getPrefHeight();
+
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        // Fond blanc
+        gc.setFill(Color.WHITE);
+        gc.fillRect(0, 0, width, height);
+
         positions.clear();
+
         Set<Personne> visites = new HashSet<>();
-        int startX = getWidth() / 2;
+        int startX = (int) width / 2;
         int startY = 20;
-        dessinerNoeud(g, arbre.getRacine(), startX, startY, visites);
+
+        dessinerNoeud(gc, arbre.getRacine(), startX, startY, visites);
     }
 
-    private int dessinerNoeud(Graphics g, Personne p, int x, int y, Set<Personne> visites) {
+    private int dessinerNoeud(GraphicsContext gc, Personne p, int x, int y, Set<Personne> visites) {
         if (p == null || visites.contains(p)) {
             return 0;
         }
@@ -47,7 +72,7 @@ public class ArbrePanel extends JPanel {
         int currentX = x;
 
         for (Personne enfant : enfants) {
-            int childWidth = dessinerNoeud(g, enfant, currentX, y + boxHeight + verticalSpacing, visites);
+            int childWidth = dessinerNoeud(gc, enfant, currentX, y + boxHeight + verticalSpacing, visites);
             enfantsX.add(currentX);
             currentX += childWidth + horizontalSpacing;
             totalWidth += childWidth + horizontalSpacing;
@@ -58,31 +83,41 @@ public class ArbrePanel extends JPanel {
 
         int nodeX = enfants.isEmpty() ? x : (enfantsX.get(0) + enfantsX.get(enfantsX.size() - 1)) / 2;
 
-        Rectangle rect = new Rectangle(nodeX - boxWidth / 2, y, boxWidth, boxHeight);
+        javafx.geometry.Rectangle2D rect = new javafx.geometry.Rectangle2D(nodeX - boxWidth / 2, y, boxWidth, boxHeight);
         positions.put(p, rect);
 
-        g.setColor(new Color(230, 240, 255));
-        g.fillRect(rect.x, rect.y, rect.width, rect.height);
-        g.setColor(Color.BLUE.darker());
-        g.drawRect(rect.x, rect.y, rect.width, rect.height);
+        // Dessin du rectangle avec fond bleu clair
+        gc.setFill(Color.rgb(230, 240, 255));
+        gc.fillRect(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight());
 
+        gc.setStroke(Color.DARKBLUE);
+        gc.strokeRect(rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight());
+
+        // Texte centré
         String texte = p.getPrenom() + " " + p.getNom();
-        FontMetrics fm = g.getFontMetrics();
-        int textWidth = fm.stringWidth(texte);
-        int textX = rect.x + (rect.width - textWidth) / 2;
-        int textY = rect.y + (rect.height + fm.getAscent()) / 2 - 4;
-        g.setColor(Color.BLACK);
-        g.drawString(texte, textX, textY);
+        gc.setFill(Color.BLACK);
+        gc.setFont(Font.font("System", 14));
 
+        // Calcul largeur texte approximatif
+        Text text = new Text(texte);
+        text.setFont(gc.getFont());
+        double textWidth = text.getLayoutBounds().getWidth();
+        double textX = rect.getMinX() + (rect.getWidth() - textWidth) / 2;
+        double textY = rect.getMinY() + (rect.getHeight() + 14) / 2 - 4; // 14 = font size approx
+
+        gc.fillText(texte, textX, textY);
+
+        // Dessiner les lignes vers enfants
         for (Personne enfant : enfants) {
-            Rectangle childRect = positions.get(enfant);
+            javafx.geometry.Rectangle2D childRect = positions.get(enfant);
             if (childRect != null) {
-                int x1 = rect.x + rect.width / 2;
-                int y1 = rect.y + rect.height;
-                int x2 = childRect.x + childRect.width / 2;
-                int y2 = childRect.y;
-                g.setColor(Color.GRAY);
-                g.drawLine(x1, y1, x2, y2);
+                double x1 = rect.getMinX() + rect.getWidth() / 2;
+                double y1 = rect.getMinY() + rect.getHeight();
+                double x2 = childRect.getMinX() + childRect.getWidth() / 2;
+                double y2 = childRect.getMinY();
+
+                gc.setStroke(Color.GRAY);
+                gc.strokeLine(x1, y1, x2, y2);
             }
         }
 

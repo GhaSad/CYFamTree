@@ -1,129 +1,169 @@
 package view;
 
+import dao.UtilisateurDAO;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 import model.Utilisateur;
 
-import dao.*;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.time.LocalDate;
 import java.util.List;
 
 public class AdminPage {
 
-    private JFrame frame;
-    private JTable table;
-    private DefaultTableModel tableModel;
+    private Stage stage;
+    private TableView<Utilisateur> tableView;
+    private ObservableList<Utilisateur> utilisateursObservable;
     private UtilisateurDAO utilisateurDAO;
 
-    // Mot de passe admin simple en dur (à sécuriser en production)
     private static final String ADMIN_PASSWORD = "admin123";
 
     public AdminPage() {
         utilisateurDAO = new UtilisateurDAO();
-        initialize();
-        chargerUtilisateurs();
     }
 
-    private void initialize() {
-        frame = new JFrame("Administration des utilisateurs");
-        frame.setSize(700, 400);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
+    public void show() {
+        if (!demanderMotDePasseAdmin()) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", null, "Mot de passe incorrect. Accès refusé.");
+            return;
+        }
 
-        tableModel = new DefaultTableModel(new Object[]{"Login", "Nom", "Prénom", "Date Naissance", "Nationalité", "Validé"}, 0);
-        table = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(table);
+        stage = new Stage();
+        stage.setTitle("Administration des utilisateurs");
 
-        JButton btnValider = new JButton("Valider inscription");
-        JButton btnSupprimer = new JButton("Supprimer utilisateur");
-        JButton btnRetour = new JButton("Retour à l'accueil");
+        BorderPane root = new BorderPane();
+        root.setPadding(new Insets(10));
 
-        btnValider.addActionListener(e -> validerUtilisateur());
-        btnSupprimer.addActionListener(e -> supprimerUtilisateur());
-        btnRetour.addActionListener(e -> {
-            frame.dispose();
+        // Création de la TableView
+        tableView = new TableView<>();
+        utilisateursObservable = FXCollections.observableArrayList();
+        tableView.setItems(utilisateursObservable);
+
+        TableColumn<Utilisateur, String> loginCol = new TableColumn<>("Login");
+        loginCol.setCellValueFactory(new PropertyValueFactory<>("login"));
+
+        TableColumn<Utilisateur, String> nomCol = new TableColumn<>("Nom");
+        nomCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
+
+        TableColumn<Utilisateur, String> prenomCol = new TableColumn<>("Prénom");
+        prenomCol.setCellValueFactory(new PropertyValueFactory<>("prenom"));
+
+        TableColumn<Utilisateur, String> dateNaissanceCol = new TableColumn<>("Date Naissance");
+        dateNaissanceCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getDateNaissance() != null) {
+                return new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDateNaissance().toString());
+            } else {
+                return new javafx.beans.property.SimpleStringProperty("");
+            }
+        });
+
+        TableColumn<Utilisateur, String> nationaliteCol = new TableColumn<>("Nationalité");
+        nationaliteCol.setCellValueFactory(new PropertyValueFactory<>("nationalite"));
+
+        TableColumn<Utilisateur, String> valideCol = new TableColumn<>("Validé");
+        valideCol.setCellValueFactory(cellData -> {
+            boolean estValide = cellData.getValue().getEstValide();
+            return new javafx.beans.property.SimpleStringProperty(estValide ? "Validé" : "En attente");
+        });
+
+        tableView.getColumns().addAll(loginCol, nomCol, prenomCol, dateNaissanceCol, nationaliteCol, valideCol);
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        root.setCenter(tableView);
+
+        // Boutons
+        Button btnValider = new Button("Valider inscription");
+        Button btnSupprimer = new Button("Supprimer utilisateur");
+        Button btnRetour = new Button("Retour à l'accueil");
+
+        btnValider.setOnAction(e -> validerUtilisateur());
+        btnSupprimer.setOnAction(e -> supprimerUtilisateur());
+        btnRetour.setOnAction(e -> {
+            stage.close();
             AccueilPage accueilPage = new AccueilPage();
             accueilPage.show();
         });
 
-        JPanel panelBoutons = new JPanel();
-        panelBoutons.add(btnValider);
-        panelBoutons.add(btnSupprimer);
-        panelBoutons.add(btnRetour);
+        HBox buttonBox = new HBox(10, btnValider, btnSupprimer, btnRetour);
+        buttonBox.setPadding(new Insets(10));
+        root.setBottom(buttonBox);
 
-        frame.setLayout(new BorderLayout());
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(panelBoutons, BorderLayout.SOUTH);
+        chargerUtilisateurs();
+
+        Scene scene = new Scene(root, 700, 400);
+        stage.setScene(scene);
+        stage.centerOnScreen();
+        stage.show();
     }
 
-private void chargerUtilisateurs() {
-    tableModel.setRowCount(0);
-    List<Utilisateur> utilisateurs = utilisateurDAO.findAll();  // Tous les utilisateurs
-    for (Utilisateur u : utilisateurs) {
-        tableModel.addRow(new Object[]{
-            u.getLogin(),
-            u.getNom(),
-            u.getPrenom(),
-            u.getDateNaissance(),
-            u.getNationalite(),
-            u.getEstValide() ? "Validé" : "En attente"
-        });
+    private void chargerUtilisateurs() {
+        List<Utilisateur> utilisateurs = utilisateurDAO.findAll();
+        utilisateursObservable.setAll(utilisateurs);
     }
-}
 
-
-private void validerUtilisateur() {
-    int selectedRow = table.getSelectedRow();
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(frame, "Veuillez sélectionner un utilisateur.");
-        return;
+    private void validerUtilisateur() {
+        Utilisateur selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Attention", null, "Veuillez sélectionner un utilisateur.");
+            return;
+        }
+        if (selected.getEstValide()) {
+            showAlert(Alert.AlertType.INFORMATION, "Information", null, "Cet utilisateur est déjà validé.");
+            return;
+        }
+        utilisateurDAO.validerUtilisateur(selected.getLogin());
+        chargerUtilisateurs();
+        showAlert(Alert.AlertType.INFORMATION, "Succès", null, "Inscription validée.");
     }
-    String login = (String) tableModel.getValueAt(selectedRow, 0);
-    String etat = (String) tableModel.getValueAt(selectedRow, 5);
-    if ("Validé".equals(etat)) {
-        JOptionPane.showMessageDialog(frame, "Cet utilisateur est déjà validé.");
-        return;
+
+    private void supprimerUtilisateur() {
+        Utilisateur selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Attention", null, "Veuillez sélectionner un utilisateur.");
+            return;
+        }
+        utilisateurDAO.supprimerUtilisateur(selected.getLogin());
+        chargerUtilisateurs();
+        showAlert(Alert.AlertType.INFORMATION, "Succès", null, "Utilisateur supprimé.");
     }
-    utilisateurDAO.validerUtilisateur(login);
-    chargerUtilisateurs();
-    JOptionPane.showMessageDialog(frame, "Inscription validée.");
-}
-
-
-
-private void supprimerUtilisateur() {
-    int selectedRow = table.getSelectedRow();
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(frame, "Veuillez sélectionner un utilisateur.");
-        return;
-    }
-    String login = (String) tableModel.getValueAt(selectedRow, 0);
-    utilisateurDAO.supprimerUtilisateur(login);
-    chargerUtilisateurs();   // <-- mettre ici le nom correct de ta méthode de chargement
-    JOptionPane.showMessageDialog(frame, "Utilisateur supprimé.");
-}
-
-
-
-public void show() {
-    if (demanderMotDePasseAdmin()) {
-        chargerUtilisateurs();  // Charge tous
-        frame.setVisible(true);
-    } else {
-        JOptionPane.showMessageDialog(null, "Mot de passe incorrect. Accès refusé.", "Erreur", JOptionPane.ERROR_MESSAGE);
-    }
-}
-
 
     private boolean demanderMotDePasseAdmin() {
-        JPasswordField pwd = new JPasswordField();
-        int action = JOptionPane.showConfirmDialog(null, pwd, "Veuillez entrer le mot de passe admin", JOptionPane.OK_CANCEL_OPTION);
-        if (action == JOptionPane.OK_OPTION) {
-            String saisie = new String(pwd.getPassword());
-            return ADMIN_PASSWORD.equals(saisie);
-        }
-        return false;
+        // Dialogue personnalisé avec PasswordField
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Mot de passe admin");
+        dialog.setHeaderText(null);
+        dialog.setResizable(false);
+
+        ButtonType btnOk = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnOk, btnCancel);
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Mot de passe");
+
+        dialog.getDialogPane().setContent(passwordField);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == btnOk) {
+                return passwordField.getText();
+            }
+            return null;
+        });
+
+        String result = dialog.showAndWait().orElse(null);
+        return ADMIN_PASSWORD.equals(result);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

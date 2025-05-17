@@ -1,150 +1,159 @@
 package view;
-import model.*;
-import dao.*;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import dao.AuthentificationDAO;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+import model.Nationalite;
+import model.Utilisateur;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 public class InscriptionPage {
-    private JFrame frame;
-    private JTextField loginField;
-    private JPasswordField passwordField;
-    private JTextField nomField;
-    private JTextField prenomField;
-    private JTextField dateNaissanceField;
-    private JComboBox<Nationalite> nationaliteComboBox;
-    private JButton registerButton;
+
+    private Stage stage;
+    private TextField loginField;
+    private PasswordField passwordField;
+    private TextField nomField;
+    private TextField prenomField;
+    private TextField dateNaissanceField;
+    private ComboBox<Nationalite> nationaliteComboBox;
+    private Button registerButton;
+    private Button btnRetour;
+
     private AuthentificationDAO authentificationDAO;
 
     public InscriptionPage() {
         authentificationDAO = new AuthentificationDAO();
+        stage = new Stage();
         initialize();
     }
-	
+
     private void initialize() {
-        frame = new JFrame("Inscription");
-        frame.setBounds(100, 100, 400, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(null);
-		
-		// Dans la méthode initialize() de InscriptionPage, ajoute après le bouton d'inscription :
+        stage.setTitle("Inscription");
 
-JButton btnRetour = new JButton("Retour à l'accueil");
-btnRetour.setBounds(130, 320, 150, 30);
-frame.getContentPane().add(btnRetour);
+        GridPane grid = new GridPane();
+        grid.setVgap(10);
+        grid.setHgap(10);
+        grid.setPadding(new Insets(20));
 
-btnRetour.addActionListener(e -> {
-    frame.dispose();  // Fermer la fenêtre d'inscription
-    AccueilPage accueil = new AccueilPage();
-    accueil.show();   // Ouvrir la page d'accueil
-});
-		
-		
-        JLabel loginLabel = new JLabel("Login :");
-        loginLabel.setBounds(50, 30, 100, 25);
-        frame.getContentPane().add(loginLabel);
+        // Labels and fields
+        Label loginLabel = new Label("Login :");
+        loginField = new TextField();
+        loginField.setPromptText("Votre login");
 
-        loginField = new JTextField();
-        loginField.setBounds(160, 30, 160, 25);
-        frame.getContentPane().add(loginField);
+        Label passwordLabel = new Label("Mot de passe :");
+        passwordField = new PasswordField();
+        passwordField.setPromptText("Votre mot de passe");
 
-        JLabel passwordLabel = new JLabel("Mot de passe :");
-        passwordLabel.setBounds(50, 70, 100, 25);
-        frame.getContentPane().add(passwordLabel);
+        Label nomLabel = new Label("Nom :");
+        nomField = new TextField();
+        nomField.setPromptText("Votre nom");
 
-        passwordField = new JPasswordField();
-        passwordField.setBounds(160, 70, 160, 25);
-        frame.getContentPane().add(passwordField);
+        Label prenomLabel = new Label("Prénom :");
+        prenomField = new TextField();
+        prenomField.setPromptText("Votre prénom");
 
-        JLabel nomLabel = new JLabel("Nom :");
-        nomLabel.setBounds(50, 110, 100, 25);
-        frame.getContentPane().add(nomLabel);
+        Label dateLabel = new Label("Date naissance (YYYY-MM-DD) :");
+        dateNaissanceField = new TextField();
+        dateNaissanceField.setPromptText("YYYY-MM-DD");
 
-        nomField = new JTextField();
-        nomField.setBounds(160, 110, 160, 25);
-        frame.getContentPane().add(nomField);
+        Label nationaliteLabel = new Label("Nationalité :");
+        nationaliteComboBox = new ComboBox<>();
+        nationaliteComboBox.getItems().setAll(Nationalite.values());
+        nationaliteComboBox.getSelectionModel().selectFirst();
 
-        JLabel prenomLabel = new JLabel("Prénom :");
-        prenomLabel.setBounds(50, 150, 100, 25);
-        frame.getContentPane().add(prenomLabel);
+        registerButton = new Button("S'inscrire");
+        btnRetour = new Button("Retour à l'accueil");
 
-        prenomField = new JTextField();
-        prenomField.setBounds(160, 150, 160, 25);
-        frame.getContentPane().add(prenomField);
+        // Position dans la grille
+        grid.add(loginLabel, 0, 0);
+        grid.add(loginField, 1, 0);
 
-        JLabel dateLabel = new JLabel("Date naissance (YYYY-MM-DD) :");
-        dateLabel.setBounds(50, 190, 200, 25);
-        frame.getContentPane().add(dateLabel);
+        grid.add(passwordLabel, 0, 1);
+        grid.add(passwordField, 1, 1);
 
-        dateNaissanceField = new JTextField();
-        dateNaissanceField.setBounds(250, 190, 100, 25);
-        frame.getContentPane().add(dateNaissanceField);
+        grid.add(nomLabel, 0, 2);
+        grid.add(nomField, 1, 2);
 
-        JLabel nationaliteLabel = new JLabel("Nationalité :");
-        nationaliteLabel.setBounds(50, 230, 100, 25);
-        frame.getContentPane().add(nationaliteLabel);
+        grid.add(prenomLabel, 0, 3);
+        grid.add(prenomField, 1, 3);
 
-        nationaliteComboBox = new JComboBox<>(Nationalite.values());
-        nationaliteComboBox.setBounds(160, 230, 160, 25);
-        frame.getContentPane().add(nationaliteComboBox);
+        grid.add(dateLabel, 0, 4);
+        grid.add(dateNaissanceField, 1, 4);
 
-        registerButton = new JButton("S'inscrire");
-        registerButton.setBounds(130, 280, 120, 30);
-        frame.getContentPane().add(registerButton);
+        grid.add(nationaliteLabel, 0, 5);
+        grid.add(nationaliteComboBox, 1, 5);
 
-        registerButton.addActionListener(e -> {
-            try {
-                String login = loginField.getText().trim();
-                String password = new String(passwordField.getPassword()).trim();
-                String nom = nomField.getText().trim();
-                String prenom = prenomField.getText().trim();
-                String dateStr = dateNaissanceField.getText().trim();
-                LocalDate dateNaissance = LocalDate.parse(dateStr);
-                Nationalite nationalite = (Nationalite) nationaliteComboBox.getSelectedItem();
+        grid.add(registerButton, 0, 6);
+        grid.add(btnRetour, 1, 6);
 
-                if(login.isEmpty() || password.isEmpty() || nom.isEmpty() || prenom.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Tous les champs doivent être remplis.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if(authentificationDAO.userExists(login)) {
-                    JOptionPane.showMessageDialog(frame, "Ce login existe déjà.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                Utilisateur utilisateur = new Utilisateur(nom, prenom, dateNaissance, nationalite, 0, true,false);
-
-                authentificationDAO.save(utilisateur, login, password);
-                JOptionPane.showMessageDialog(frame, "Inscription en attente ! Votre demande va être traitée");
-
-                frame.dispose();
-
-                // Ouvrir la page de connexion après inscription
-                ConnexionPage connexionPage = new ConnexionPage();
-                connexionPage.show();
-
-            } catch (DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(frame, "Format de date invalide. Utilisez YYYY-MM-DD.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Erreur lors de l'inscription : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
+        // Actions des boutons
+        registerButton.setOnAction(e -> handleRegister());
+        btnRetour.setOnAction(e -> {
+            stage.close();
+            AccueilPage accueilPage = new AccueilPage();
+            accueilPage.show();
         });
-    }
-	
-    public void show() {
-        frame.setVisible(true);
-    }
-    public JFrame getFrame() {
-    return frame;
-}
-    
 
-    public static void main(String[] args) {
-        InscriptionPage inscriptionPage = new InscriptionPage();
-        inscriptionPage.show();
+        stage.setScene(new Scene(grid, 400, 400));
+        stage.centerOnScreen();
+    }
+
+    private void handleRegister() {
+        String login = loginField.getText().trim();
+        String password = passwordField.getText().trim();
+        String nom = nomField.getText().trim();
+        String prenom = prenomField.getText().trim();
+        String dateStr = dateNaissanceField.getText().trim();
+        Nationalite nationalite = nationaliteComboBox.getSelectionModel().getSelectedItem();
+
+        if (login.isEmpty() || password.isEmpty() || nom.isEmpty() || prenom.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Tous les champs doivent être remplis.");
+            return;
+        }
+
+        LocalDate dateNaissance;
+        try {
+            dateNaissance = LocalDate.parse(dateStr);
+        } catch (DateTimeParseException ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Format de date invalide. Utilisez YYYY-MM-DD.");
+            return;
+        }
+
+        if (authentificationDAO.userExists(login)) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Ce login existe déjà.");
+            return;
+        }
+
+        Utilisateur utilisateur = new Utilisateur(nom, prenom, dateNaissance, nationalite, 0, true, false);
+
+        try {
+            authentificationDAO.save(utilisateur, login, password);
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Inscription en attente ! Votre demande va être traitée");
+            stage.close();
+
+            ConnexionPage connexionPage = new ConnexionPage();
+            connexionPage.show();
+
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'inscription : " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public void show() {
+        stage.show();
     }
 }

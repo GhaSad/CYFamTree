@@ -1,63 +1,54 @@
 package view;
-import model.*;
 
-import javax.swing.*;
-import java.awt.*;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 public class AccueilPage {
 
-    private JFrame frame;
-    private JButton btnInscription;
-    private JButton btnConnexion;
+    private Stage stage;
 
     public AccueilPage() {
-        initialize();
-    }
+        stage = new Stage();
+        stage.setTitle("Accueil");
 
-    private void initialize() {
-        frame = new JFrame("Accueil");
-        frame.setSize(350, 150);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new FlowLayout());
+        FlowPane root = new FlowPane();
+        root.setHgap(10);
+        root.setVgap(10);
+        root.setPadding(new Insets(10));
 
-        btnInscription = new JButton("S'inscrire");
-        btnConnexion = new JButton("Se connecter");
+        Button btnInscription = new Button("S'inscrire");
+        Button btnConnexion = new Button("Se connecter");
+        Button btnAdmin = new Button("Administration");
 
-        frame.add(btnInscription);
-        frame.add(btnConnexion);
-
-        btnInscription.addActionListener(e -> {
-            frame.dispose();  // Fermer la page d'accueil
+        btnInscription.setOnAction(e -> {
+            stage.close();
             InscriptionPage inscriptionPage = new InscriptionPage();
             inscriptionPage.show();
         });
 
-        btnConnexion.addActionListener(e -> {
-            frame.dispose();  // Fermer la page d'accueil
+        btnConnexion.setOnAction(e -> {
+            stage.close();
             ConnexionPage connexionPage = new ConnexionPage();
             connexionPage.show();
         });
-        JButton btnAdmin = new JButton("Administration");
-frame.add(btnAdmin);
 
-btnAdmin.addActionListener(e -> {
-    frame.dispose();
-    AdminPage adminPage = new AdminPage();
-    adminPage.show();
-});
-        
-        
+        btnAdmin.setOnAction(e -> {
+            stage.close();
+            AdminPage adminPage = new AdminPage();
+            adminPage.show();
+        });
+
+        root.getChildren().addAll(btnInscription, btnConnexion, btnAdmin);
+
+        Scene scene = new Scene(root, 350, 150);
+        stage.setScene(scene);
+        stage.centerOnScreen();
     }
 
     public void show() {
-        frame.setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            AccueilPage accueil = new AccueilPage();
-            accueil.show();
-        });
+        stage.show();
     }
 }

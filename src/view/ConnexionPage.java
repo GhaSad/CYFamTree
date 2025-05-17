@@ -1,122 +1,85 @@
 package view;
 
-import model.*;
-import dao.*;
-
-import tests.*;
-import view.AccueilUtilisateur;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.time.LocalDate;
+import dao.AuthentificationDAO;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import model.Utilisateur;
 
 public class ConnexionPage {
-    private JFrame frame;
-    private JTextField loginField;
-    private JPasswordField passwordField;
-    private JButton loginButton;
+
+    private Stage stage;
+    private TextField loginField;
+    private PasswordField passwordField;
+    private Button loginButton;
     private AuthentificationDAO authentificationDAO;
 
     public ConnexionPage() {
         authentificationDAO = new AuthentificationDAO();
+        stage = new Stage();
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame("Connexion");
-        frame.setBounds(100, 100, 400, 300);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setLayout(null);
+        stage.setTitle("Connexion");
 
-        JLabel loginLabel = new JLabel("Login:");
-        loginLabel.setBounds(50, 50, 100, 30);
-        frame.getContentPane().add(loginLabel);
+        Label loginLabel = new Label("Login:");
+        loginField = new TextField();
+        loginField.setPromptText("Votre login");
 
-        loginField = new JTextField();
-        loginField.setBounds(150, 50, 150, 30);
-        frame.getContentPane().add(loginField);
-        loginField.setColumns(10);
+        Label passwordLabel = new Label("Mot de Passe:");
+        passwordField = new PasswordField();
+        passwordField.setPromptText("Votre mot de passe");
 
-        JLabel passwordLabel = new JLabel("Mot de Passe:");
-        passwordLabel.setBounds(50, 100, 100, 30);
-        frame.getContentPane().add(passwordLabel);
+        loginButton = new Button("Se connecter");
+        Button btnRetour = new Button("Retour à l'accueil");
 
-        passwordField = new JPasswordField();
-        passwordField.setBounds(150, 100, 150, 30);
-        frame.getContentPane().add(passwordField);
-
-        loginButton = new JButton("Se connecter");
-        loginButton.setBounds(150, 150, 150, 30);
-        frame.getContentPane().add(loginButton);
-
-        // Bouton retour à l'accueil optionnel
-        JButton btnRetour = new JButton("Retour à l'accueil");
-        btnRetour.setBounds(150, 200, 150, 30);
-        frame.getContentPane().add(btnRetour);
-        btnRetour.addActionListener(e -> {
-            frame.dispose();
+        loginButton.setOnAction(e -> handleConnexion());
+        btnRetour.setOnAction(e -> {
+            stage.close();
             AccueilPage accueilPage = new AccueilPage();
             accueilPage.show();
         });
 
-        loginButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String login = loginField.getText().trim();
-                String password = new String(passwordField.getPassword()).trim();
-
-                if (login.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Veuillez remplir tous les champs.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                Utilisateur utilisateur = authentificationDAO.authentifier(login, password);
-
-if (utilisateur == null) {
-    JOptionPane.showMessageDialog(frame, "Échec de la connexion. Vérifiez vos identifiants.");
-} else if (!utilisateur.getEstValide()) {
-    JOptionPane.showMessageDialog(frame, "Compte en cours de validation. Veuillez patienter.");
-} else {
-    // Connexion réussie et validée
-    JOptionPane.showMessageDialog(frame, "Connexion réussie ! Bienvenue " + utilisateur.getPrenom());
-    frame.dispose();
-    new AccueilUtilisateur(utilisateur);
-
-}
-
-            }
-        });
+        VBox vbox = new VBox(10, loginLabel, loginField, passwordLabel, passwordField, loginButton, btnRetour);
+        vbox.setPadding(new Insets(20));
+        stage.setScene(new Scene(vbox, 350, 300));
+        stage.centerOnScreen();
     }
 
-    private void ouvrirArbre(Utilisateur utilisateur) {
-        Personne parent = new Personne("Guillarme", "Arno", LocalDate.of(1970, 10, 24), Nationalite.FRANCAIS, 54);
-        Personne enfant = new Personne("Martin", "Julie", LocalDate.of(2003, 3, 2), Nationalite.FRANCAIS, 29);
-        Personne frere = new Personne("Dupont", "Jean", LocalDate.of(2010, 8, 22), Nationalite.FRANCAIS, 13);
+    private void handleConnexion() {
+        String login = loginField.getText().trim();
+        String password = passwordField.getText().trim();
 
-        Noeud noeudParent = new Noeud(parent);
-        Noeud noeudEnfant = new Noeud(enfant);
-        Noeud noeudFrere = new Noeud(frere);
+        if (login.isEmpty() || password.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Veuillez remplir tous les champs.");
+            return;
+        }
 
-        noeudParent.ajouterEnfant(noeudEnfant);
-        noeudParent.ajouterEnfant(noeudFrere);
+        Utilisateur utilisateur = authentificationDAO.authentifier(login, password);
 
-        ArbreGenealogique arbre = new ArbreGenealogique(utilisateur, parent);
-        arbre.ajouterNoeud(noeudParent);
-        arbre.ajouterNoeud(noeudEnfant);
-        arbre.ajouterNoeud(noeudFrere);
+        if (utilisateur == null) {
+            showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Vérifiez vos identifiants.");
+        } else if (!utilisateur.getEstValide()) {
+            showAlert(Alert.AlertType.WARNING, "Compte en attente", "Compte en cours de validation. Veuillez patienter.");
+        } else {
+            showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue " + utilisateur.getPrenom() + " !");
+            stage.close();
+            AccueilUtilisateur.show(utilisateur);
+        }
+    }
 
-        SwingUtilities.invokeLater(() -> {
-            JFrame arbreFrame = new JFrame("Arbre Généalogique");
-            arbreFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            arbreFrame.add(new ArbrePanel(arbre));
-            arbreFrame.pack();
-            arbreFrame.setLocationRelativeTo(null);
-            arbreFrame.setVisible(true);
-        });
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public void show() {
-        frame.setVisible(true);
+        stage.show();
     }
 }
