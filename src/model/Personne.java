@@ -48,6 +48,13 @@ public class Personne {
     	return nom;
     }
 
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
     
     
     
@@ -115,7 +122,9 @@ public class Personne {
         }
     }
     
-    
+    public void setId(int id) {
+        this.id = id;
+    }
     
     
     @Override

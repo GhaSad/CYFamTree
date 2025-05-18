@@ -52,7 +52,7 @@ public class AccueilUtilisateur extends Application {
                 utilisateur.setArbre(arbre);
 
                 primaryStage.close();
-                arbre.afficherGraphique();  // À adapter si besoin
+                arbre.afficherArbreGraphiqueCustom();  // À adapter si besoin
             });
 
             root.getChildren().addAll(info, creerBtn);
@@ -62,9 +62,20 @@ public class AccueilUtilisateur extends Application {
             root.getChildren().add(info);
 
             primaryStage.close();
-            utilisateur.getArbre().afficherGraphique();  // À adapter si besoin
+            utilisateur.getArbre().afficherArbreGraphiqueCustom();  // À adapter si besoin
             return;
         }
+
+        // 🔹 Bouton profil toujours visible
+        Button btnProfil = new Button("Mon profil");
+
+        btnProfil.setOnAction(e -> {
+            ProfilPage profilPage = new ProfilPage(utilisateur);
+            profilPage.show();
+        });
+
+        root.getChildren().add(btnProfil);
+
 
         Scene scene = new Scene(root, 400, 250);
         stage.setScene(scene);
@@ -75,6 +86,14 @@ public class AccueilUtilisateur extends Application {
     // ✅ Méthode statique pour lancer l'écran avec un utilisateur
     public static void show(Utilisateur utilisateur) {
         utilisateurStatic = utilisateur;
-        launch();  // Appelle start() via le constructeur par défaut
+
+        // Corrigé : création manuelle d'une instance si déjà dans le thread FX
+        AccueilUtilisateur app = new AccueilUtilisateur();
+        Stage stage = new Stage();
+        try {
+            app.start(stage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

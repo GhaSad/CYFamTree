@@ -1,8 +1,14 @@
 package model;
 
 import java.util.*;
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
+import javafx.scene.Scene;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Line;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 
 public class ArbreGenealogique {
     private Utilisateur utilisateur;
@@ -77,31 +83,75 @@ public class ArbreGenealogique {
         }
     }
 
-    // Affichage graphique avec JTree classique
-    public void afficherGraphique() {
+    public void afficherGraphiqueFX() {
+        if (racine == null) {
+            System.out.println("⚠️ Aucun racine définie pour cet arbre.");
+            return;
+        }
+
         Set<Personne> visites = new HashSet<>();
-        DefaultMutableTreeNode rootNode = construireArbreGraphique(racine, visites);
-        JTree tree = new JTree(rootNode);
+        TreeItem<String> racineItem = construireArbreFX(racine, visites);
 
-        JFrame frame = new JFrame("Arbre Généalogique (JTree)");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(new JScrollPane(tree));
-        frame.setSize(400, 500);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        TreeView<String> treeView = new TreeView<>(racineItem);
+        treeView.setShowRoot(true);
+
+        BorderPane layout = new BorderPane();
+        layout.setCenter(treeView);
+
+        Stage stage = new Stage();
+        stage.setTitle("Arbre Généalogique (JavaFX)");
+        stage.setScene(new Scene(layout, 400, 500));
+        stage.show();
     }
 
-    private DefaultMutableTreeNode construireArbreGraphique(Personne p, Set<Personne> visites) {
-        if (visites.contains(p)) {
-            return new DefaultMutableTreeNode("(cycle détecté avec " + p.getPrenom() + " " + p.getNom() + ")");
+    private TreeItem<String> construireArbreFX(Personne personne, Set<Personne> visites) {
+        if (visites.contains(personne)) {
+            return new TreeItem<>("(cycle avec " + personne.getPrenom() + " " + personne.getNom() + ")");
         }
-        visites.add(p);
 
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getPrenom() + " " + p.getNom());
-        List<Personne> enfants = getEnfants(p);
+        visites.add(personne);
+        TreeItem<String> item = new TreeItem<>(personne.getPrenom() + " " + personne.getNom());
+
+        List<Personne> enfants = getEnfants(personne);
         for (Personne enfant : enfants) {
-            node.add(construireArbreGraphique(enfant, visites));
+            item.getChildren().add(construireArbreFX(enfant, visites));
         }
-        return node;
+
+        return item;
     }
-}
+
+
+        public void afficherArbreGraphiqueCustom() {
+            Pane pane = new Pane();
+
+            // Labels pour les personnes
+            Label rootLabel = new Label(racine.getPrenom() + " " + racine.getNom());
+            rootLabel.setLayoutX(200);
+            rootLabel.setLayoutY(50);
+            pane.getChildren().add(rootLabel);
+
+            List<Personne> enfants = getEnfants(racine);
+            int startX = 100;
+
+            for (int i = 0; i < enfants.size(); i++) {
+                Personne enfant = enfants.get(i);
+                Label enfantLabel = new Label(enfant.getPrenom() + " " + enfant.getNom());
+                enfantLabel.setLayoutX(startX + i * 150);
+                enfantLabel.setLayoutY(150);
+
+                // Ligne entre parent et enfant
+                Line line = new Line(
+                        rootLabel.getLayoutX() + 30, rootLabel.getLayoutY() + 20,
+                        enfantLabel.getLayoutX() + 30, enfantLabel.getLayoutY()
+                );
+
+                pane.getChildren().addAll(line, enfantLabel);
+            }
+
+            Scene scene = new Scene(pane, 600, 400);
+            Stage stage = new Stage();
+            stage.setTitle("Arbre généalogique (Custom FX)");
+            stage.setScene(scene);
+            stage.show();
+        }
+    }

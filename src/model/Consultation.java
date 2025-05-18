@@ -1,17 +1,28 @@
 package model;
 
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Consultation {
+    private int id; // facultatif mais bon pour la base
     private Date dateConsultation;
     private Utilisateur utilisateurConsulteur;
-    private Utilisateur utilisateurCible;
-    private static int nombreConsultation = 0;
 
-    public Consultation(Utilisateur utilisateurCible, Utilisateur utilisateurConsulteur) {
-        this.utilisateurCible = utilisateurCible;
+    public Consultation(Utilisateur utilisateurConsulteur) {
         this.utilisateurConsulteur = utilisateurConsulteur;
         this.dateConsultation = new Date();
-        nombreConsultation += 1;
+    }
+
+    public Date getDateConsultation() {
+        return dateConsultation;
+    }
+
+    public Utilisateur getUtilisateurConsulteur() {
+        return utilisateurConsulteur;
+    }
+
+    public String getFormattedDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(dateConsultation);
     }
 }

@@ -5,6 +5,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import model.Consultation;
+import dao.ConsultationDAO;
 import org.mindrot.jbcrypt.BCrypt;  // <-- N'oublie pas cet import !
 
 public class AuthentificationDAO {
@@ -32,6 +34,14 @@ public Utilisateur authentifier(String login, String mdpClair) {
                     rs.getInt("est_valide") == 1
                 );
                 user.setLogin(rs.getString("login"));
+
+                // ✅ Récupère l'ID de l'utilisateur pour l'enregistrement
+                user.setId(rs.getInt("id")); // <-- très important !
+
+                // ✅ Enregistrer la consultation ici
+                Consultation consultation = new Consultation(user);
+                ConsultationDAO.enregistrerConsultation(consultation);
+
                 return user;
             }
         }

@@ -3,16 +3,31 @@ package model;
 import java.util.*;
 
 public class Noeud {
+    private int id;
     private Personne personne;
     private Visibilite visibilite;
     private List<Noeud> parents;
     private List<Noeud> enfants;
 
-    public Noeud(Personne personne) {
+    public Noeud(int id,Personne personne, Visibilite visibilite) {
+        this.id = id;
         this.personne = personne;
-        this.visibilite = Visibilite.PRIVATE; // valeur par défaut
+        this.visibilite = visibilite != null ? visibilite : Visibilite.PRIVATE; // valeur par défaut
         this.parents = new ArrayList<>();
         this.enfants = new ArrayList<>();
+    }
+
+    public Noeud(Personne personne) {
+        this(0, personne, Visibilite.PRIVATE);
+    }
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void ajouterParent(Noeud parent) {
