@@ -8,6 +8,8 @@ src/tests/
 # === Maven ===
 target/
 dependency-reduced-pom.xml
+pom.xml
+
 
 # === Eclipse ===
 .classpath
