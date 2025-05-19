@@ -16,7 +16,7 @@ public class Admin {
         id +=1 ;
     }
 
-    public void examinerFormulaire(Formulaire f){
+    public void examinerFormulaire(FormulaireUser f){
 
     }
 

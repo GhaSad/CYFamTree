@@ -39,11 +39,45 @@ public class Utilisateur extends Personne {
         this.estValide = estValide;
     }
     public ArbreGenealogique getArbre() {
-        return arbre;
+        return this.arbre;
     }
 
     public void setArbre(ArbreGenealogique arbre) {
         this.arbre = arbre;
+    }
+
+    public void ajouterNoeudAvecLien(Noeud nouveauNoeud, String lien) {
+        if (this.arbre == null) {
+            System.out.println("Erreur : l'utilisateur n'a pas encore d'arbre.");
+            return;
+        }
+
+        // Cherche le noeud associé à l'utilisateur
+        Noeud source = arbre.getNoeudParPersonne(this);
+        if (source == null) {
+            System.out.println("Erreur : noeud de l'utilisateur introuvable.");
+            return;
+        }
+
+        // Ajout logique selon le type de lien
+        switch (lien.toLowerCase()) {
+            case "père":
+            case "mère":
+                // le nouveauNoeud est un parent du source
+                source.ajouterParent(nouveauNoeud);
+                break;
+            case "fils":
+            case "fille":
+                // le nouveauNoeud est un enfant du source
+                source.ajouterEnfant(nouveauNoeud);
+                break;
+            default:
+                System.out.println("Lien non reconnu. Ajouter une logique personnalisée pour : " + lien);
+                return;
+        }
+
+        arbre.ajouterNoeud(nouveauNoeud);
+        System.out.println("Ajout effectué avec lien : " + lien);
     }
 
 }

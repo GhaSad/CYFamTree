@@ -66,6 +66,16 @@ public class ArbreGenealogique {
         afficherNoeud(racine, 0, visites);
     }
 
+    public Noeud getNoeudParPersonne(Personne personne) {
+        for (Noeud n : listeNoeuds) {
+            if (n.getPersonne().equals(personne)) {
+                return n;
+            }
+        }
+        return null;
+    }
+
+
     private void afficherNoeud(Personne p, int niveau, Set<Personne> visites) {
         if (visites.contains(p)) {
             for (int i = 0; i < niveau; i++) System.out.print("  ");
