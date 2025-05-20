@@ -2,8 +2,11 @@ package view;
 
 import dao.AuthentificationDAO;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Utilisateur;
@@ -23,18 +26,42 @@ public class ConnexionPage {
     }
 
     private void initialize() {
-        stage.setTitle("Connexion");
+        stage.setTitle("Connexion - CYFamTree");
 
-        Label loginLabel = new Label("Login:");
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(30));
+        root.setAlignment(Pos.CENTER);
+
+        Label titre = new Label("Connexion à CYFamTree");
+        titre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+
+        GridPane form = new GridPane();
+        form.setVgap(12);
+        form.setHgap(10);
+        form.setAlignment(Pos.CENTER);
+
+        Label loginLabel = new Label("Login :");
         loginField = new TextField();
         loginField.setPromptText("Votre login");
 
-        Label passwordLabel = new Label("Mot de Passe:");
+        Label passwordLabel = new Label("Mot de passe :");
         passwordField = new PasswordField();
         passwordField.setPromptText("Votre mot de passe");
 
+        form.add(loginLabel, 0, 0);
+        form.add(loginField, 1, 0);
+
+        form.add(passwordLabel, 0, 1);
+        form.add(passwordField, 1, 1);
+
         loginButton = new Button("Se connecter");
-        Button btnRetour = new Button("Retour à l'accueil");
+        Button btnRetour = new Button("Retour");
+
+        loginButton.setPrefWidth(150);
+        btnRetour.setPrefWidth(150);
+
+        HBox boutons = new HBox(20, loginButton, btnRetour);
+        boutons.setAlignment(Pos.CENTER);
 
         loginButton.setOnAction(e -> handleConnexion());
         btnRetour.setOnAction(e -> {
@@ -43,9 +70,10 @@ public class ConnexionPage {
             accueilPage.show();
         });
 
-        VBox vbox = new VBox(10, loginLabel, loginField, passwordLabel, passwordField, loginButton, btnRetour);
-        vbox.setPadding(new Insets(20));
-        stage.setScene(new Scene(vbox, 350, 300));
+        root.getChildren().addAll(titre, form, boutons);
+
+        Scene scene = new Scene(root, 400, 300);
+        stage.setScene(scene);
         stage.centerOnScreen();
     }
 

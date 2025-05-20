@@ -2,9 +2,12 @@ package view;
 
 import dao.AuthentificationDAO;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Nationalite;
 import model.Utilisateur;
@@ -33,17 +36,25 @@ public class InscriptionPage {
     }
 
     private void initialize() {
-        stage.setTitle("Inscription");
+        stage.setTitle("Inscription - CYFamTree");
 
-        GridPane grid = new GridPane();
-        grid.setVgap(10);
-        grid.setHgap(10);
-        grid.setPadding(new Insets(20));
+        // Conteneur principal
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(30));
+        root.setAlignment(Pos.CENTER);
 
-        // Labels and fields
+        Label titre = new Label("Créer un compte sur CYFamTree");
+        titre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+
+        // Formulaire
+        GridPane form = new GridPane();
+        form.setHgap(10);
+        form.setVgap(12);
+        form.setAlignment(Pos.CENTER);
+
         Label loginLabel = new Label("Login :");
         loginField = new TextField();
-        loginField.setPromptText("Votre login");
+        loginField.setPromptText("Choisissez un login");
 
         Label passwordLabel = new Label("Mot de passe :");
         passwordField = new PasswordField();
@@ -57,44 +68,46 @@ public class InscriptionPage {
         prenomField = new TextField();
         prenomField.setPromptText("Votre prénom");
 
-        Label dateLabel = new Label("Date de naissance (YYYY-MM-DD) :");
+        Label dateLabel = new Label("Date de naissance :");
         dateNaissancePicker = new DatePicker();
         dateNaissancePicker.setPromptText("YYYY-MM-DD");
-        dateNaissancePicker.setValue(LocalDate.of(2000, 1, 1)); // valeur par défaut
-
-
+        dateNaissancePicker.setValue(LocalDate.of(2000, 1, 1));
 
         Label nationaliteLabel = new Label("Nationalité :");
         nationaliteComboBox = new ComboBox<>();
         nationaliteComboBox.getItems().setAll(Nationalite.values());
         nationaliteComboBox.getSelectionModel().selectFirst();
 
+        // Positionnement des éléments
+        form.add(loginLabel, 0, 0);
+        form.add(loginField, 1, 0);
+
+        form.add(passwordLabel, 0, 1);
+        form.add(passwordField, 1, 1);
+
+        form.add(nomLabel, 0, 2);
+        form.add(nomField, 1, 2);
+
+        form.add(prenomLabel, 0, 3);
+        form.add(prenomField, 1, 3);
+
+        form.add(dateLabel, 0, 4);
+        form.add(dateNaissancePicker, 1, 4);
+
+        form.add(nationaliteLabel, 0, 5);
+        form.add(nationaliteComboBox, 1, 5);
+
+        // Boutons
         registerButton = new Button("S'inscrire");
-        btnRetour = new Button("Retour à l'accueil");
+        btnRetour = new Button("Retour");
 
-        // Position dans la grille
-        grid.add(loginLabel, 0, 0);
-        grid.add(loginField, 1, 0);
+        registerButton.setPrefWidth(150);
+        btnRetour.setPrefWidth(150);
 
-        grid.add(passwordLabel, 0, 1);
-        grid.add(passwordField, 1, 1);
+        HBox boutons = new HBox(20, registerButton, btnRetour);
+        boutons.setAlignment(Pos.CENTER);
 
-        grid.add(nomLabel, 0, 2);
-        grid.add(nomField, 1, 2);
-
-        grid.add(prenomLabel, 0, 3);
-        grid.add(prenomField, 1, 3);
-
-        grid.add(dateLabel, 0, 4);
-        grid.add(dateNaissancePicker, 1, 4);
-
-        grid.add(nationaliteLabel, 0, 5);
-        grid.add(nationaliteComboBox, 1, 5);
-
-        grid.add(registerButton, 0, 6);
-        grid.add(btnRetour, 1, 6);
-
-        // Actions des boutons
+        // Actions
         registerButton.setOnAction(e -> handleRegister());
         btnRetour.setOnAction(e -> {
             stage.close();
@@ -102,9 +115,14 @@ public class InscriptionPage {
             accueilPage.show();
         });
 
-        stage.setScene(new Scene(grid, 400, 400));
+        // Construction finale
+        root.getChildren().addAll(titre, form, boutons);
+
+        Scene scene = new Scene(root, 450, 500);
+        stage.setScene(scene);
         stage.centerOnScreen();
     }
+
 
     private void handleRegister() {
         String login = loginField.getText().trim();

@@ -73,8 +73,8 @@ public class ProfilPage {
         root.getChildren().addAll(
                 new Label("Prénom :"), prenomField,
                 new Label("Nom :"), nomField,
-                new Label("Date de naissance :"), dateNaissance,
-                new Label("Nationalité :"), nationalite,
+                dateNaissance,
+                nationalite,
                 new Label("Nouveau mot de passe :"), mdpField,
                 new Label("Confirmer :"), confirmMdpField,
                 enregistrer

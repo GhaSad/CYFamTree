@@ -1,9 +1,11 @@
 package view;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.control.Label;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class AccueilPage {
@@ -12,16 +14,29 @@ public class AccueilPage {
 
     public AccueilPage() {
         stage = new Stage();
-        stage.setTitle("Accueil");
+        stage.setTitle("Bienvenue sur CYFamTree");
 
-        FlowPane root = new FlowPane();
-        root.setHgap(10);
-        root.setVgap(10);
-        root.setPadding(new Insets(10));
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(30));
+        root.setAlignment(Pos.CENTER);
 
+        Label titre = new Label("Bienvenue sur CYFamTree 👨‍👩‍👧‍👦");
+        titre.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+
+        Label sousTitre = new Label("Créez, explorez et partagez votre arbre généalogique.");
+        sousTitre.setStyle("-fx-font-size: 14px; -fx-text-fill: #444;");
+
+        // Boutons
         Button btnInscription = new Button("S'inscrire");
         Button btnConnexion = new Button("Se connecter");
         Button btnAdmin = new Button("Administration");
+
+        btnInscription.setPrefWidth(200);
+        btnConnexion.setPrefWidth(200);
+        btnAdmin.setPrefWidth(200);
+
+        VBox boutonBox = new VBox(15, btnInscription, btnConnexion, btnAdmin);
+        boutonBox.setAlignment(Pos.CENTER);
 
         btnInscription.setOnAction(e -> {
             stage.close();
@@ -41,9 +56,9 @@ public class AccueilPage {
             adminPage.show();
         });
 
-        root.getChildren().addAll(btnInscription, btnConnexion, btnAdmin);
+        root.getChildren().addAll(titre, sousTitre, boutonBox);
 
-        Scene scene = new Scene(root, 350, 150);
+        Scene scene = new Scene(root, 400, 300);
         stage.setScene(scene);
         stage.centerOnScreen();
     }
