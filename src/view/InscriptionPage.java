@@ -19,7 +19,7 @@ public class InscriptionPage {
     private PasswordField passwordField;
     private TextField nomField;
     private TextField prenomField;
-    private TextField dateNaissanceField;
+    private DatePicker dateNaissancePicker; // ✅ accessible partout
     private ComboBox<Nationalite> nationaliteComboBox;
     private Button registerButton;
     private Button btnRetour;
@@ -57,9 +57,12 @@ public class InscriptionPage {
         prenomField = new TextField();
         prenomField.setPromptText("Votre prénom");
 
-        Label dateLabel = new Label("Date naissance (YYYY-MM-DD) :");
-        dateNaissanceField = new TextField();
-        dateNaissanceField.setPromptText("YYYY-MM-DD");
+        Label dateLabel = new Label("Date de naissance (YYYY-MM-DD) :");
+        dateNaissancePicker = new DatePicker();
+        dateNaissancePicker.setPromptText("YYYY-MM-DD");
+        dateNaissancePicker.setValue(LocalDate.of(2000, 1, 1)); // valeur par défaut
+
+
 
         Label nationaliteLabel = new Label("Nationalité :");
         nationaliteComboBox = new ComboBox<>();
@@ -83,7 +86,7 @@ public class InscriptionPage {
         grid.add(prenomField, 1, 3);
 
         grid.add(dateLabel, 0, 4);
-        grid.add(dateNaissanceField, 1, 4);
+        grid.add(dateNaissancePicker, 1, 4);
 
         grid.add(nationaliteLabel, 0, 5);
         grid.add(nationaliteComboBox, 1, 5);
@@ -108,7 +111,6 @@ public class InscriptionPage {
         String password = passwordField.getText().trim();
         String nom = nomField.getText().trim();
         String prenom = prenomField.getText().trim();
-        String dateStr = dateNaissanceField.getText().trim();
         Nationalite nationalite = nationaliteComboBox.getSelectionModel().getSelectedItem();
 
         if (login.isEmpty() || password.isEmpty() || nom.isEmpty() || prenom.isEmpty()) {
@@ -116,11 +118,9 @@ public class InscriptionPage {
             return;
         }
 
-        LocalDate dateNaissance;
-        try {
-            dateNaissance = LocalDate.parse(dateStr);
-        } catch (DateTimeParseException ex) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Format de date invalide. Utilisez YYYY-MM-DD.");
+        LocalDate dateNaissance = dateNaissancePicker.getValue(); // ✅ Corrigé ici
+        if (dateNaissance == null) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Veuillez sélectionner une date.");
             return;
         }
 
@@ -144,6 +144,7 @@ public class InscriptionPage {
             ex.printStackTrace();
         }
     }
+
 
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);

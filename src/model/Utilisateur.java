@@ -38,6 +38,7 @@ public class Utilisateur extends Personne {
     public void setEstValide(Boolean estValide) {
         this.estValide = estValide;
     }
+
     public ArbreGenealogique getArbre() {
         return this.arbre;
     }

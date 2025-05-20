@@ -55,9 +55,6 @@ public class Personne {
         this.nom = nom;
     }
 
-    
-    
-    
     public void creerLien(Personne autre, TypeLien type) {
         Lien lien = new Lien(autre, type);
         liens.add(lien);

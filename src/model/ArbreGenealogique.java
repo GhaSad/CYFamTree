@@ -21,6 +21,10 @@ public class ArbreGenealogique {
         this.listeNoeuds = new ArrayList<>();
     }
 
+    public Utilisateur getUtilisateur() {
+        return utilisateur;
+    }
+
     public void ajouterNoeud(Noeud noeud) {
         listeNoeuds.add(noeud);
     }

@@ -1,5 +1,7 @@
 package view;
 
+import dao.*;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +13,8 @@ import javafx.stage.Stage;
 import javafx.scene.control.TextField;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Alert;
+
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -39,6 +43,20 @@ public class AccueilUtilisateur extends Application {
         if (utilisateur == null) {
             throw new IllegalStateException("Aucun utilisateur fourni à AccueilUtilisateur");
         }
+        System.out.println("🧪 utilisateur ID = " + utilisateur.getId() + " " + utilisateur.getNom());
+
+
+
+        ArbreGenealogique arbre = ArbreDAO.chargerArbreParUtilisateur(this.utilisateur);
+        this.utilisateur.setArbre(arbre);
+        System.out.println("📌 appel setArbre() avec : " + arbre);
+        System.out.println("📌 utilisateur.getArbre() = " + this.utilisateur.getArbre());
+        if (this.utilisateur.getArbre() != null) {
+            System.out.println("✅ Arbre trouvé pour " + utilisateur.getNom() + " !");
+        } else {
+            System.out.println("⚠️ Aucun arbre trouvé pour " + utilisateur.getNom());
+        }
+
 
         stage.setTitle("Accueil - Arbre Généalogique");
 
@@ -55,14 +73,44 @@ public class AccueilUtilisateur extends Application {
             Button creerBtn = new Button("Créer mon arbre");
 
             creerBtn.setOnAction(e -> {
-                ArbreGenealogique arbre = new ArbreGenealogique(utilisateur, utilisateur);
-                Noeud racine = new Noeud(utilisateur);
-                arbre.ajouterNoeud(racine);
-                utilisateur.setArbre(arbre);
+                try {
+                    if (utilisateur.getArbre() != null) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous avez déjà un arbre.");
+                        alert.show();
+                        return;
+                    }
 
-                primaryStage.close();
-                arbre.afficherArbreGraphiqueCustom();  // À adapter si besoin
+                    Personne personneRacine = utilisateur;
+
+                    // ⚠️ NE PAS sauvegarder à nouveau la personne : elle est déjà dans la table avec id = utilisateur.id
+
+                    // 3. Création du noeud racine
+                    Noeud racine = new Noeud(personneRacine);
+
+                    Connection conn = Database.getConnection();
+                    NoeudDAO noeudDAO = new NoeudDAO(conn);
+                    noeudDAO.sauvegarderNoeud(racine, -1); // insertion du noeud (arbre_id temporaire)
+
+                    // 5. Création de l'arbre
+                    ArbreGenealogique arbre1 = new ArbreGenealogique(utilisateur, personneRacine);
+                    arbre1.ajouterNoeud(racine);
+                    utilisateur.setArbre(arbre1);
+
+                    // 6. Enregistrement de l'arbre
+                    int idArbre = ArbreDAO.creerArbre(arbre1);
+                    noeudDAO.ajouterArbreIdAuNoeud(racine, idArbre);
+
+                    // 8. Affichage
+                    primaryStage.close();
+                    arbre1.afficherArbreGraphiqueCustom();
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    new Alert(Alert.AlertType.ERROR, "Erreur lors de la création de l'arbre.").show();
+                }
             });
+
+
 
             // Nouveau bouton pour ajouter une personne
             Button ajouterPersonneBtn = new Button("Ajouter une personne");
