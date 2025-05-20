@@ -42,6 +42,11 @@ public class ProfilPage {
         Label nationalite = new Label("Nationalité : " + utilisateur.getNationalite());
 
         Button enregistrer = new Button("Enregistrer");
+        
+        Button voirDemandesLien = new Button("Voir mes demandes de lien");
+        voirDemandesLien.setOnAction(e -> {
+            DemandesLienPage.show(utilisateur); // Appelle la page JavaFX avec l'utilisateur connecté
+        });
 
         enregistrer.setOnAction(e -> {
             String nouveauPrenom = prenomField.getText().trim();
@@ -77,7 +82,8 @@ public class ProfilPage {
                 nationalite,
                 new Label("Nouveau mot de passe :"), mdpField,
                 new Label("Confirmer :"), confirmMdpField,
-                enregistrer
+                enregistrer,
+                voirDemandesLien
         );
     }
 
