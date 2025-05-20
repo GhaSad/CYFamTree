@@ -10,7 +10,8 @@ public enum TypeLien {
     FRERE("Frère"),
     TANTE("Tante"),
     ONCLE("Oncle"),
-    GRAND_PERE("Grand-père");
+    GRAND_PERE("Grand-père"),
+	GRAND_MERE("Grand-mère");
 
     private final String libelle;
 

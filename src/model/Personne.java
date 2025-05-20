@@ -12,6 +12,7 @@ public class Personne {
     private Nationalite nationalite;
     private int Age;
     private List<Lien> liens;
+    boolean estInscrit = false;
 
     public Personne(String nom, String prenom, LocalDate date, Nationalite nationalite, int age) {
         this.id = ++compteurId;
@@ -22,7 +23,13 @@ public class Personne {
         this.Age = age;
         liens = new ArrayList<>();
     }
-    
+    public boolean estInscrit() {
+        return estInscrit;
+    }
+
+    public void setEstInscrit(boolean estInscrit) {
+        this.estInscrit = estInscrit;
+    }
     
     public int getId() {
         return id;
@@ -56,8 +63,12 @@ public class Personne {
     }
 
     public void creerLien(Personne autre, TypeLien type) {
-        Lien lien = new Lien(autre, type);
-        liens.add(lien);
+        
+	    Lien lien = new Lien(this, autre, type);
+	    	if (!lien.estValide()) {
+	    	    throw new IllegalArgumentException("Lien invalide : contrainte non respectée.");
+	    	}
+	    	liens.add(lien);
     }
 
     public List<Lien> getLiens() {
