@@ -26,9 +26,18 @@ public class Lien {
         Personne lie = this.getPersonneLiee();
         
 
-        // Si les deux sont inscrits, un mécanisme de confirmation serait requis (non implémenté ici)
-        if (source.estInscrit() && lie.estInscrit()) {
-            // TODO : vérifier si le lien a été confirmé (à gérer ailleurs dans l'appli)
+        if (lie.estInscrit()) {
+            lie.asUtilisateur().ifPresent(destinataire -> {
+                String sujet = "Demande de confirmation de lien de parenté";
+                String corps = "Bonjour " + destinataire.getPrenom() + ",\n\n" +
+                               source.getPrenom() + " souhaite vous ajouter comme " +
+                               this.typeLien.name().toLowerCase() + " dans son arbre généalogique.\n" +
+                               "Merci de vous connecter à votre espace pour accepter ou refuser cette demande.";
+
+                utils.EmailService.envoyerEmail(destinataire.getEmail(), sujet, corps);
+            });
+            service.LienManager.ajouterDemande(new LienEnAttente(source, lie, this.typeLien));
+            return false; 
         }
         
         switch (this.typeLien) {

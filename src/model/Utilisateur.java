@@ -6,6 +6,7 @@ public class Utilisateur extends Personne {
     private String login;           // <-- ajout
     private Boolean estValide;
     private ArbreGenealogique arbre;
+    private String email;
 
 
     public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, boolean estInscrit, boolean estValide) {
@@ -16,6 +17,14 @@ public class Utilisateur extends Personne {
 
     public String getLogin() {
         return login;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setLogin(String login) {

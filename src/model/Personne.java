@@ -61,6 +61,19 @@ public class Personne {
     public void setNom(String nom) {
         this.nom = nom;
     }
+    
+    public void creerLienDirect(Personne autre, TypeLien type) {
+        Lien lien = new Lien(this, autre, type);
+        this.liens.add(lien);
+    }
+    
+    public Optional<Utilisateur> asUtilisateur() {
+        if (this instanceof Utilisateur) {
+            return Optional.of((Utilisateur) this);
+        }
+        return Optional.empty();
+    }
+
 
     public void creerLien(Personne autre, TypeLien type) {
         
