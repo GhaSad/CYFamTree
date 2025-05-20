@@ -20,4 +20,15 @@ public class RessourcePartagee {
         this.destinataires = destinataires;
         this.idRessource += compteur++;
     }
+
+    public Personne getAuteur() {
+        return auteur;
+    }
+    public void setAuteur(Personne auteur) {
+        this.auteur = auteur;
+    }
+
+    public String getFichier() {
+        return fichier;
+    }
 }

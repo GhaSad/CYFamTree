@@ -189,7 +189,11 @@ public class AccueilUtilisateur extends Application {
             profilPage.show();
         });
 
-        root.getChildren().add(btnProfil);
+        Button btnRessources = new Button("Ressources partagées");
+        btnRessources.setOnAction(e -> {
+            new RPPage(utilisateur).show();
+        });
+
 
         Button btnRecherche = new Button("Recherche par critère");
 
@@ -198,7 +202,8 @@ public class AccueilUtilisateur extends Application {
             recherchePage.show();
         });
 
-        root.getChildren().add(btnRecherche);
+        root.getChildren().addAll(btnProfil, btnRecherche, btnRessources);
+
 
 
         Scene scene = new Scene(root, 400, 250);
