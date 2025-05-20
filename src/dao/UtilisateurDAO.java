@@ -117,4 +117,54 @@ public List<Utilisateur> findAll() {
             e.printStackTrace();
         }
     }
+
+    public List<Utilisateur> rechercherParCritere(String nom, String prenom, Nationalite nat) {
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        String sql = "SELECT * FROM utilisateur WHERE 1=1";
+        List<Object> params = new ArrayList<>();
+
+        if (nom != null && !nom.isEmpty()) {
+            sql += " AND nom LIKE ?";
+            params.add("%" + nom + "%");
+        }
+        if (prenom != null && !prenom.isEmpty()) {
+            sql += " AND prenom LIKE ?";
+            params.add("%" + prenom + "%");
+        }
+        if (nat != null) {
+            sql += " AND nationalite = ?";
+            params.add(nat.name());
+        }
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Injection des paramètres dynamiquement
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Utilisateur u = new Utilisateur(
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        LocalDate.parse(rs.getString("date_naissance")),
+                        Nationalite.valueOf(rs.getString("nationalite")),
+                        0,
+                        rs.getInt("est_inscrit") == 1,
+                        rs.getInt("est_valide") == 1
+                );
+                u.setLogin(rs.getString("login"));
+                u.setId(rs.getInt("id"));
+                utilisateurs.add(u);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return utilisateurs;
+    }
+
 }

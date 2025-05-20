@@ -191,6 +191,15 @@ public class AccueilUtilisateur extends Application {
 
         root.getChildren().add(btnProfil);
 
+        Button btnRecherche = new Button("Recherche par critère");
+
+        btnRecherche.setOnAction(e -> {
+            RecherchePage recherchePage = new RecherchePage(utilisateur);
+            recherchePage.show();
+        });
+
+        root.getChildren().add(btnRecherche);
+
 
         Scene scene = new Scene(root, 400, 250);
         stage.setScene(scene);
