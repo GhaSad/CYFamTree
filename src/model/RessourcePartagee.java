@@ -1,20 +1,23 @@
 package model;
 
 import java.util.*;
+import java.time.LocalDateTime;
 
 public class RessourcePartagee {
-    private int idRessource = 0;
+    private int idRessource;
+    private static int compteur = 1;
     private TypeRessource typeRessource;
     private String fichier;
-    private Date date;
-    private Personne Auteur;
+    private LocalDateTime date;
+    private Personne auteur;
     private List<Personne> destinataires;
 
-    public RessourcePartagee(TypeRessource typeRessource, Personne Auteur, List<Personne> destinataires) {
-        this.date = new Date();
-        this.Auteur = Auteur;
+    public RessourcePartagee(TypeRessource typeRessource,String fichier, Personne Auteur, List<Personne> destinataires) {
+        this.date = LocalDateTime.now();
+        this.auteur = Auteur;
         this.typeRessource = typeRessource;
+        this.fichier = fichier;
         this.destinataires = destinataires;
-        this.idRessource += 1;
+        this.idRessource += compteur++;
     }
 }
