@@ -4,19 +4,27 @@ import java.time.LocalDate;
 
 public class Utilisateur extends Personne {
     private String login;           // <-- ajout
-    private Boolean estInscrit;
     private Boolean estValide;
     private ArbreGenealogique arbre;
+    private String email;
 
 
-    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, Boolean estInscrit, Boolean estValide){
+    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, boolean estInscrit, boolean estValide) {
         super(nom, prenom, dateNaissance, nationalite, age);
-        this.estInscrit = estInscrit;
+        this.setEstInscrit(estInscrit);
         this.estValide = estValide;
     }
 
     public String getLogin() {
         return login;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setLogin(String login) {

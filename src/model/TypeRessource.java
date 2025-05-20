@@ -3,7 +3,8 @@ package model;
 public enum TypeRessource {
     FICHIER("Fichier"),
     IMAGE("Image"),
-    LIEN("model.Lien");
+    LIEN("Lien"),
+    VIDEO("VIDEO");
 
     private final String libelle;
 

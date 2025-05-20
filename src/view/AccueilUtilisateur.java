@@ -2,25 +2,22 @@ package view;
 
 import dao.*;
 
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.control.TextField;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Alert;
 
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.Period;
 
-import javafx.scene.control.ComboBox;
 
-
+import javafx.util.Duration;
 import model.*;
 
 public class AccueilUtilisateur extends Application {
@@ -69,8 +66,11 @@ public class AccueilUtilisateur extends Application {
         root.getChildren().add(bienvenue);
 
         if (utilisateur.getArbre() == null) {
-            Label info = new Label("Vous n'avez pas encore d'arbre généalogique.");
+            Label info = new Label("😕 Vous n'avez pas encore d'arbre généalogique.");
+            info.setStyle("-fx-font-size: 14px; -fx-text-fill: #444;");
+
             Button creerBtn = new Button("Créer mon arbre");
+            creerBtn.setPrefWidth(150);
 
             creerBtn.setOnAction(e -> {
                 try {
@@ -81,26 +81,18 @@ public class AccueilUtilisateur extends Application {
                     }
 
                     Personne personneRacine = utilisateur;
-
-                    // ⚠️ NE PAS sauvegarder à nouveau la personne : elle est déjà dans la table avec id = utilisateur.id
-
-                    // 3. Création du noeud racine
                     Noeud racine = new Noeud(personneRacine);
-
                     Connection conn = Database.getConnection();
                     NoeudDAO noeudDAO = new NoeudDAO(conn);
-                    noeudDAO.sauvegarderNoeud(racine, -1); // insertion du noeud (arbre_id temporaire)
+                    noeudDAO.sauvegarderNoeud(racine, -1);
 
-                    // 5. Création de l'arbre
                     ArbreGenealogique arbre1 = new ArbreGenealogique(utilisateur, personneRacine);
                     arbre1.ajouterNoeud(racine);
                     utilisateur.setArbre(arbre1);
 
-                    // 6. Enregistrement de l'arbre
                     int idArbre = ArbreDAO.creerArbre(arbre1);
                     noeudDAO.ajouterArbreIdAuNoeud(racine, idArbre);
 
-                    // 8. Affichage
                     primaryStage.close();
                     arbre1.afficherArbreGraphiqueCustom();
 
@@ -110,75 +102,21 @@ public class AccueilUtilisateur extends Application {
                 }
             });
 
+// ➕ Organisation des boutons
+            HBox actionsBox = new HBox(20, creerBtn);
+            actionsBox.setAlignment(Pos.CENTER);
 
+            VBox blocArbre = new VBox(15, info, actionsBox);
+            blocArbre.setAlignment(Pos.CENTER);
+            blocArbre.setPadding(new Insets(20));
 
-            // Nouveau bouton pour ajouter une personne
-            Button ajouterPersonneBtn = new Button("Ajouter une personne");
+            root.getChildren().add(blocArbre);
 
-            ajouterPersonneBtn.setOnAction(e -> {
-                Stage formulaireStage = new Stage();
-                formulaireStage.setTitle("Ajouter une personne");
-
-                VBox form = new VBox(10);
-                form.setPadding(new Insets(10));
-
-                TextField nomField = new TextField();
-                nomField.setPromptText("Nom");
-
-                TextField prenomField = new TextField();
-                prenomField.setPromptText("Prénom");
-
-                DatePicker dateNaissancePicker = new DatePicker();
-
-                TextField lienParenteField = new TextField();
-                lienParenteField.setPromptText("Lien de parenté (ex : père, mère, frère...)");
-
-                Button validerBtn = new Button("Valider");
-
-                validerBtn.setOnAction(ev -> {
-                    String nom = nomField.getText();
-                    String prenom = prenomField.getText();
-                    LocalDate dateNaissance = dateNaissancePicker.getValue();
-                    String lien = lienParenteField.getText();
-                    Nationalite nationalite = utilisateur.getNationalite();
-                    int age = Period.between(dateNaissance, LocalDate.now()).getYears();
-
-                    if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || lien.isEmpty() || nationalite == null) {
-                        Alert alert = new Alert(Alert.AlertType.WARNING, "Tous les champs doivent être remplis.");
-                        alert.show();
-                        return;
-                    }
-
-                    // Création de la nouvelle personne
-                    Personne nouvellePersonne = new Personne(nom, prenom, dateNaissance, nationalite, age);
-                    Noeud nouveauNoeud = new Noeud(nouvellePersonne);
-
-                    utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien); // méthode à définir
-
-                    formulaireStage.close();
-                });
-
-                form.getChildren().addAll(
-                        new Label("Nom :"), nomField,
-                        new Label("Prénom :"), prenomField,
-                        new Label("Date de naissance :"), dateNaissancePicker,
-                        new Label("Lien de parenté :"), lienParenteField,
-                        validerBtn
-                );
-
-                Scene scene = new Scene(form, 300, 300);
-                formulaireStage.setScene(scene);
-                formulaireStage.show();
-            });
-
-            root.getChildren().addAll(info, creerBtn, ajouterPersonneBtn);
 
         } else {
-            Label info = new Label("Chargement de votre arbre généalogique...");
-            root.getChildren().add(info);
-            primaryStage.close();
-            utilisateur.getArbre().afficherArbreGraphiqueCustom();  // À adapter si besoin
-            return;
+            Label arbreInfo = new Label("🌳 Vous avez déjà un arbre généalogique.");
+            arbreInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #228B22;");
+
         }
 
         // 🔹 Bouton profil toujours visible
@@ -189,7 +127,96 @@ public class AccueilUtilisateur extends Application {
             profilPage.show();
         });
 
-        root.getChildren().add(btnProfil);
+        Button btnConsulterArbre = new Button("Consulter mon arbre");
+        btnConsulterArbre.setOnAction(e -> {
+            if (utilisateur.getArbre() != null) {
+                utilisateur.getArbre().afficherArbreGraphiqueCustom();
+            } else {
+                new Alert(Alert.AlertType.INFORMATION, "Aucun arbre n'a encore été créé.").show();
+            }
+        });
+
+        // ➕ Bouton "Ajouter une personne"
+        Button ajouterPersonneBtn = new Button("Ajouter une personne");
+        ajouterPersonneBtn.setPrefWidth(150);
+
+        ajouterPersonneBtn.setOnAction(e -> {
+                    Stage formulaireStage = new Stage();
+                    formulaireStage.setTitle("Ajouter une personne");
+
+                    VBox form = new VBox(10);
+                    form.setPadding(new Insets(10));
+                    form.setAlignment(Pos.CENTER_LEFT);
+
+                    TextField nomField = new TextField();
+                    nomField.setPromptText("Nom");
+
+                    TextField prenomField = new TextField();
+                    prenomField.setPromptText("Prénom");
+
+                    DatePicker dateNaissancePicker = new DatePicker();
+
+                    TextField lienParenteField = new TextField();
+                    lienParenteField.setPromptText("Lien de parenté (ex : père, mère...)");
+
+                    Button validerBtn = new Button("Valider");
+
+                    validerBtn.setOnAction(ev -> {
+                        String nom = nomField.getText();
+                        String prenom = prenomField.getText();
+                        LocalDate dateNaissance = dateNaissancePicker.getValue();
+                        String lien = lienParenteField.getText();
+                        Nationalite nationalite = utilisateur.getNationalite();
+                        int age = Period.between(dateNaissance, LocalDate.now()).getYears();
+
+                        if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || lien.isEmpty()) {
+                            Alert alert = new Alert(Alert.AlertType.WARNING, "Tous les champs doivent être remplis.");
+                            alert.show();
+                            return;
+                        }
+
+                        Personne nouvellePersonne = new Personne(nom, prenom, dateNaissance, nationalite, age);
+                        Noeud nouveauNoeud = new Noeud(nouvellePersonne);
+                        utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
+
+                        formulaireStage.close();
+                    });
+
+                    form.getChildren().addAll(
+                            new Label("Nom :"), nomField,
+                            new Label("Prénom :"), prenomField,
+                            new Label("Date de naissance :"), dateNaissancePicker,
+                            new Label("Lien de parenté :"), lienParenteField,
+                            validerBtn
+                    );
+
+                    Scene scene = new Scene(form, 300, 300);
+                    formulaireStage.setScene(scene);
+                    formulaireStage.show();
+
+        });
+
+        Button btnRessources = new Button("Ressources partagées");
+        btnRessources.setOnAction(e -> {
+                    new RPPage(utilisateur).show();
+        });
+
+
+        Button btnRecherche = new Button("Recherche par critère");
+
+        btnRecherche.setOnAction(e -> {
+            RecherchePage recherchePage = new RecherchePage(utilisateur);
+            recherchePage.show();
+        });
+
+        root.getChildren().addAll(
+                btnConsulterArbre,
+                ajouterPersonneBtn,
+                btnProfil,
+                btnRessources,
+                btnRecherche
+        );
+
 
 
         Scene scene = new Scene(root, 400, 250);

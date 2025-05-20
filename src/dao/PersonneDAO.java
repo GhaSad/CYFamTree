@@ -43,7 +43,7 @@ public class PersonneDAO {
             if (rs.next()) {
                 String nom = rs.getString("nom");
                 String prenom = rs.getString("prenom");
-                LocalDate dateNaissance = rs.getDate("date_naissance").toLocalDate();
+                LocalDate dateNaissance = LocalDate.parse(rs.getString("date_naissance"));
                 Nationalite nationalite = Nationalite.valueOf(rs.getString("nationalite").toUpperCase());
                 int age = rs.getInt("age");
 
