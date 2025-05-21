@@ -92,12 +92,19 @@ public class ConnexionPage {
             showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Vérifiez vos identifiants.");
         } else if (!utilisateur.getEstValide()) {
             showAlert(Alert.AlertType.WARNING, "Compte en attente", "Compte en cours de validation. Veuillez patienter.");
+        } else if (utilisateur.isDoitChangerMotDePasse()) {
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Changement requis",
+                    "Ceci est votre première connexion. Veuillez changer votre mot de passe.");
+            stage.close();
+            new ChangementMDPPage(utilisateur).show();
         } else {
             showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue " + utilisateur.getPrenom() + " !");
             stage.close();
             AccueilUtilisateur.show(utilisateur);
         }
     }
+
 
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);

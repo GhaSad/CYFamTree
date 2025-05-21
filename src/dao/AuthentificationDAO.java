@@ -12,46 +12,52 @@ import org.mindrot.jbcrypt.BCrypt;  // <-- N'oublie pas cet import !
 public class AuthentificationDAO {
 
     // Vérifier les identifiants de l'utilisateur
-public Utilisateur authentifier(String login, String mdpClair) {
-    String sql = "SELECT * FROM utilisateur WHERE login = ?";
-    try (Connection conn = Database.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    public Utilisateur authentifier(String login, String mdpClair) {
+        String sql = "SELECT * FROM utilisateur WHERE login = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        pstmt.setString(1, login);
-        ResultSet rs = pstmt.executeQuery();
+            pstmt.setString(1, login);
+            ResultSet rs = pstmt.executeQuery();
+            System.out.println("🔍 Requête exécutée avec login = '" + login + "'");
 
-        if (rs.next()) {
-            String motDePasseHash = rs.getString("mot_de_passe");
+            if (rs.next()) {
+                System.out.println("✅ Utilisateur trouvé en base : " + rs.getString("login"));
+                String motDePasseHash = rs.getString("mot_de_passe");
 
-            if (BCrypt.checkpw(mdpClair, motDePasseHash)) {
-                Utilisateur user = new Utilisateur(
-                    rs.getString("nom"),
-                    rs.getString("prenom"),
-                    LocalDate.parse(rs.getString("date_naissance")),
-                    Nationalite.valueOf(rs.getString("nationalite")),
-                    0,
-                    rs.getInt("est_inscrit") == 1,
-                    rs.getInt("est_valide") == 1
-                );
-                user.setLogin(rs.getString("login"));
+                if (BCrypt.checkpw(mdpClair, motDePasseHash)) {
+                    Utilisateur user = new Utilisateur(
+                            rs.getString("nom"),
+                            rs.getString("prenom"),
+                            LocalDate.parse(rs.getString("date_naissance")),
+                            Nationalite.valueOf(rs.getString("nationalite")),
+                            0,
+                            rs.getInt("est_inscrit") == 1,
+                            rs.getInt("est_valide") == 1,
+                            rs.getString("email"),
+                            rs.getString("numero_securite"),
+                            rs.getString("carte_identite"),
+                            rs.getString("photo_numerique")
+                    );
 
-                // ✅ Récupère l'ID de l'utilisateur pour l'enregistrement
-                user.setId(rs.getInt("id")); // <-- très important !
+                    user.setLogin(rs.getString("login"));
+                    user.setId(rs.getInt("id"));
+                    user.setDoitChangerMotDePasse(rs.getInt("doit_changer_mdp") == 1);
 
-                // ✅ Enregistrer la consultation ici
-                Consultation consultation = new Consultation(user);
-                ConsultationDAO.enregistrerConsultation(consultation);
+                    // Enregistrement de consultation
+                    Consultation consultation = new Consultation(user);
+                    ConsultationDAO.enregistrerConsultation(consultation);
 
-                return user;
+                    return user;
+                }
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return null;
     }
-    return null;
-}
-
 
     public void save(Utilisateur utilisateur, String login, String motDePasseClair) {
         if (userExists(login)) {
@@ -60,35 +66,41 @@ public Utilisateur authentifier(String login, String mdpClair) {
         }
 
         try (Connection conn = Database.getConnection()) {
-            // 1. Insertion de l'utilisateur
-            String sqlUtilisateur = "INSERT INTO utilisateur(login, mot_de_passe, nom, prenom, date_naissance, nationalite, est_inscrit, est_valide) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+            String sqlUtilisateur = "INSERT INTO utilisateur(" +
+                    "login, mot_de_passe, nom, prenom, date_naissance, nationalite, " +
+                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement pstmt = conn.prepareStatement(sqlUtilisateur, Statement.RETURN_GENERATED_KEYS)) {
-                String hash = BCrypt.hashpw(motDePasseClair, BCrypt.gensalt());
+                String motDePasseInitial = utilisateur.getPrenom().toLowerCase();
+                String hash = BCrypt.hashpw(motDePasseInitial, BCrypt.gensalt());
 
                 pstmt.setString(1, login);
                 pstmt.setString(2, hash);
                 pstmt.setString(3, utilisateur.getNom());
                 pstmt.setString(4, utilisateur.getPrenom());
-                pstmt.setString(5, utilisateur.getDateNaissance().toString()); // ✅ propre
+                pstmt.setString(5, utilisateur.getDateNaissance().toString());
                 pstmt.setString(6, utilisateur.getNationalite().name());
                 pstmt.setInt(7, utilisateur.getEstInscrit() ? 1 : 0);
                 pstmt.setInt(8, 0); // est_valide = 0
+                pstmt.setInt(9, 1); // doit changer mdp
+                pstmt.setString(10, utilisateur.getEmail());
+                pstmt.setString(11, utilisateur.getNumeroSecurite());
+                pstmt.setString(12, utilisateur.getCarteIdentite());
+                pstmt.setString(13, utilisateur.getPhotoNumerique());
 
                 pstmt.executeUpdate();
 
-                // 2. Récupérer l'id auto-généré de l'utilisateur
                 ResultSet rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
                     int id = rs.getInt(1);
-                    utilisateur.setId(id); // mise à jour dans l'objet Java
+                    utilisateur.setId(id);
 
-                    // 3. Insérer la personne associée avec le même ID
                     String sqlPersonne = "INSERT INTO personne(id_personne, nom, prenom, date_naissance, nationalite, age) VALUES (?, ?, ?, ?, ?, ?)";
 
                     try (PreparedStatement stmtPersonne = conn.prepareStatement(sqlPersonne)) {
-                        stmtPersonne.setInt(1, id);  // id_personne = id_utilisateur
+                        stmtPersonne.setInt(1, id);
                         stmtPersonne.setString(2, utilisateur.getNom());
                         stmtPersonne.setString(3, utilisateur.getPrenom());
                         stmtPersonne.setString(4, utilisateur.getDateNaissance().toString());
@@ -98,9 +110,8 @@ public Utilisateur authentifier(String login, String mdpClair) {
                         stmtPersonne.executeUpdate();
                     }
 
-                    System.out.println("Utilisateur et personne associés ajoutés avec succès (id = " + id + ").");
+                    System.out.println("✅ Utilisateur et personne associés ajoutés avec succès (id = " + id + ")");
                 }
-
             }
 
         } catch (SQLException e) {

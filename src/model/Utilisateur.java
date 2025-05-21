@@ -7,12 +7,20 @@ public class Utilisateur extends Personne {
     private Boolean estValide;
     private ArbreGenealogique arbre;
     private String email;
+    private String numeroSecurite;
+    private String carteIdentite;
+    private String photoNumerique;
+    private boolean doitChangerMotDePasse;
 
 
-    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, boolean estInscrit, boolean estValide) {
+    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, boolean estInscrit, boolean estValide, String email,String numeroSecurite, String carteIdentite, String photoNumerique) {
         super(nom, prenom, dateNaissance, nationalite, age);
         this.setEstInscrit(estInscrit);
         this.estValide = estValide;
+        this.email = email;
+        this.numeroSecurite = numeroSecurite;
+        this.carteIdentite = carteIdentite;
+        this.photoNumerique = photoNumerique;
     }
 
     public String getLogin() {
@@ -34,6 +42,39 @@ public class Utilisateur extends Personne {
     public int getAge() {
         return LocalDate.now().getYear() - getDateNaissance().getYear();
     }
+
+    public String getNumeroSecurite() {
+        return numeroSecurite;
+    }
+
+    public void setNumeroSecurite(String numeroSecurite) {
+        this.numeroSecurite = numeroSecurite;
+    }
+
+    public String getCarteIdentite() {
+        return carteIdentite;
+    }
+
+    public void setCarteIdentite(String numeroCarteIdentite) {
+        this.carteIdentite = carteIdentite;
+    }
+
+    public String getPhotoNumerique() {
+        return photoNumerique;
+    }
+
+    public void setPhotoNumerique(String photoNumerique) {
+        this.photoNumerique = photoNumerique;
+    }
+
+    public boolean isDoitChangerMotDePasse() {
+        return doitChangerMotDePasse;
+    }
+
+    public void setDoitChangerMotDePasse(boolean doitChangerMotDePasse) {
+        this.doitChangerMotDePasse = doitChangerMotDePasse;
+    }
+
 
     public Boolean getEstInscrit() {
         return estInscrit;

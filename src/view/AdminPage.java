@@ -102,7 +102,7 @@ public class AdminPage {
     }
 
     private void chargerUtilisateurs() {
-        List<Utilisateur> utilisateurs = utilisateurDAO.findAll();
+        List<Utilisateur> utilisateurs = utilisateurDAO.findAll(); // ✅
         utilisateursObservable.setAll(utilisateurs);
     }
 
