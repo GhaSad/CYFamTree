@@ -12,6 +12,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Nationalite;
 import model.Utilisateur;
+import service.EmailService;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -214,6 +215,12 @@ public class InscriptionPage {
 
         try {
             authentificationDAO.save(utilisateur, login, null); // mot de passe = prénom automatiquement
+            EmailService.envoyerMail(
+                    email,
+                    "Bienvenue sur CYFamTree !",
+                    "Bonjour " + prenom + ",\n\nMerci pour votre inscription sur CYFamTree.\n" +
+                            "Votre mot de passe initial est : " + prenom + "\n\nVotre compte sera validé sous peu.\n\nL'équipe CYFamTree"
+            );
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Inscription enregistrée !\nMot de passe initial : votre prénom.");
             stage.close();
             new ConnexionPage().show();

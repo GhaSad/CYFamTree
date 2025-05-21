@@ -16,11 +16,20 @@ public class ArbreGenealogique {
     private Utilisateur utilisateur;
     private Personne racine;
     private List<Noeud> listeNoeuds;
+    private int id;
 
     public ArbreGenealogique(Utilisateur utilisateur, Personne racine) {
         this.utilisateur = utilisateur;
         this.racine = racine;
         this.listeNoeuds = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public Utilisateur getUtilisateur() {

@@ -146,8 +146,21 @@ public class Personne {
     public void setId(int id) {
         this.id = id;
     }
-    
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Personne personne = (Personne) obj;
+        return this.getId() == personne.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(getId());
+    }
+
+
     @Override
     public String toString() {
     	return "ID : " +id + " Nom : " + nom + " Prenom ; " + prenom + " Date : " +dateNaissance + "";

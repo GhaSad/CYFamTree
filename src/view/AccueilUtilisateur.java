@@ -91,6 +91,7 @@ public class AccueilUtilisateur extends Application {
                     utilisateur.setArbre(arbre1);
 
                     int idArbre = ArbreDAO.creerArbre(arbre1);
+                    arbre1.setId(idArbre);
                     noeudDAO.ajouterArbreIdAuNoeud(racine, idArbre);
 
                     primaryStage.close();
@@ -136,65 +137,14 @@ public class AccueilUtilisateur extends Application {
             }
         });
 
-        // ➕ Bouton "Ajouter une personne"
+
         Button ajouterPersonneBtn = new Button("Ajouter une personne");
         ajouterPersonneBtn.setPrefWidth(150);
 
         ajouterPersonneBtn.setOnAction(e -> {
-                    Stage formulaireStage = new Stage();
-                    formulaireStage.setTitle("Ajouter une personne");
-
-                    VBox form = new VBox(10);
-                    form.setPadding(new Insets(10));
-                    form.setAlignment(Pos.CENTER_LEFT);
-
-                    TextField nomField = new TextField();
-                    nomField.setPromptText("Nom");
-
-                    TextField prenomField = new TextField();
-                    prenomField.setPromptText("Prénom");
-
-                    DatePicker dateNaissancePicker = new DatePicker();
-
-                    TextField lienParenteField = new TextField();
-                    lienParenteField.setPromptText("Lien de parenté (ex : père, mère...)");
-
-                    Button validerBtn = new Button("Valider");
-
-                    validerBtn.setOnAction(ev -> {
-                        String nom = nomField.getText();
-                        String prenom = prenomField.getText();
-                        LocalDate dateNaissance = dateNaissancePicker.getValue();
-                        String lien = lienParenteField.getText();
-                        Nationalite nationalite = utilisateur.getNationalite();
-                        int age = Period.between(dateNaissance, LocalDate.now()).getYears();
-
-                        if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || lien.isEmpty()) {
-                            Alert alert = new Alert(Alert.AlertType.WARNING, "Tous les champs doivent être remplis.");
-                            alert.show();
-                            return;
-                        }
-
-                        Personne nouvellePersonne = new Personne(nom, prenom, dateNaissance, nationalite, age);
-                        Noeud nouveauNoeud = new Noeud(nouvellePersonne);
-                        utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
-
-                        formulaireStage.close();
-                    });
-
-                    form.getChildren().addAll(
-                            new Label("Nom :"), nomField,
-                            new Label("Prénom :"), prenomField,
-                            new Label("Date de naissance :"), dateNaissancePicker,
-                            new Label("Lien de parenté :"), lienParenteField,
-                            validerBtn
-                    );
-
-                    Scene scene = new Scene(form, 300, 300);
-                    formulaireStage.setScene(scene);
-                    formulaireStage.show();
-
+            new AjoutPersonnePage(utilisateur).show();
         });
+
 
         Button btnRessources = new Button("Ressources partagées");
         btnRessources.setOnAction(e -> {
