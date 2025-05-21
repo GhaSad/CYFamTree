@@ -98,20 +98,22 @@ public class UtilisateurDAO {
     }
 
     public static void updateProfil(Utilisateur utilisateur) {
-        String sql = "UPDATE utilisateur SET nom = ?, prenom = ? WHERE login = ?";
+        String sql = "UPDATE utilisateur SET email = ?, num_tel = ? WHERE login = ?";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, utilisateur.getNom());
-            stmt.setString(2, utilisateur.getPrenom());
+            stmt.setString(1, utilisateur.getEmail());
+            stmt.setString(2, utilisateur.getNumTel());
             stmt.setString(3, utilisateur.getLogin());
+
             stmt.executeUpdate();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public static void updateMotDePasse(String login, String nouveauMdp) {
         String hash = BCrypt.hashpw(nouveauMdp, BCrypt.gensalt());
