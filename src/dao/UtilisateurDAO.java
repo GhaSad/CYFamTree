@@ -29,8 +29,9 @@ public class UtilisateurDAO {
                         rs.getString("email"),
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
-                        rs.getString("photo_numerique")
-                );System.out.println("→ Utilisateur récupéré : " + rs.getString("login"));
+                        rs.getString("photo_numerique"),
+                        rs.getString("num_tel")
+                );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
                 utilisateurs.add(u);
@@ -41,7 +42,6 @@ public class UtilisateurDAO {
         return utilisateurs;
     }
 
-
     public List<Utilisateur> findAll() {
         List<Utilisateur> utilisateurs = new ArrayList<>();
         String sql = "SELECT * FROM utilisateur";
@@ -50,7 +50,7 @@ public class UtilisateurDAO {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                System.out.println("✅ Utilisateur en attente trouvé : " + rs.getString("login"));
+                System.out.println("✅ Utilisateur trouvé : " + rs.getString("login"));
                 Utilisateur u = new Utilisateur(
                         rs.getString("nom"),
                         rs.getString("prenom"),
@@ -62,7 +62,8 @@ public class UtilisateurDAO {
                         rs.getString("email"),
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
-                        rs.getString("photo_numerique")
+                        rs.getString("photo_numerique"),
+                        rs.getString("num_tel")
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -168,7 +169,8 @@ public class UtilisateurDAO {
                         rs.getString("email"),
                         rs.getString("numero_securite"),
                         rs.getString("numero_carte"),
-                        rs.getString("photo_numerique")
+                        rs.getString("photo_numerique"),
+                        rs.getString("num_tel") // ✅ ajout du nouveau champ ici
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -181,6 +183,5 @@ public class UtilisateurDAO {
 
         return utilisateurs;
     }
-
 
 }

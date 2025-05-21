@@ -28,6 +28,7 @@ public class InscriptionPage {
     private TextField numeroSecuField;
     private TextField cheminCarteIdentiteField;
     private TextField cheminPhotoField;
+    private TextField numTelField;
     private DatePicker dateNaissancePicker; // ✅ accessible partout
     private ComboBox<Nationalite> nationaliteComboBox;
     private Button registerButton;
@@ -89,6 +90,10 @@ public class InscriptionPage {
         numeroSecuField = new TextField();
         numeroSecuField.setPromptText("Numéro sécurité sociale");
 
+        Label numTelLabel = new Label("Numéro de téléphone :");
+        numTelField = new TextField();
+        numTelField.setPromptText("ex: 0612345678");
+
         Label carteIdentiteLabel = new Label("Carte d'identité :");
         cheminCarteIdentiteField = new TextField();
         cheminCarteIdentiteField.setPromptText("Aucun fichier choisi");
@@ -136,11 +141,16 @@ public class InscriptionPage {
         form.add(numeroSecuLabel, 0, 7);
         form.add(numeroSecuField, 1, 7);
 
-        form.add(carteIdentiteLabel, 0, 8);
-        form.add(new HBox(10, cheminCarteIdentiteField, btnCarte), 1, 8);
+        form.add(numTelLabel, 0, 8);
+        form.add(numTelField, 1, 8);
 
-        form.add(photoLabel, 0, 9);
-        form.add(new HBox(10, cheminPhotoField, btnPhoto), 1, 9);
+// décale les suivants de +1 :
+        form.add(carteIdentiteLabel, 0, 9);
+        form.add(new HBox(10, cheminCarteIdentiteField, btnCarte), 1, 9);
+
+        form.add(photoLabel, 0, 10);
+        form.add(new HBox(10, cheminPhotoField, btnPhoto), 1, 10);
+
 
         // Boutons
         registerButton = new Button("S'inscrire");
@@ -175,12 +185,13 @@ public class InscriptionPage {
         String prenom = prenomField.getText().trim();
         String email = emailField.getText().trim();
         String numeroSecu = numeroSecuField.getText().trim();
+        String numTel = numTelField.getText().trim();
         String carteIdentitePath = cheminCarteIdentiteField.getText().trim();
         String photoPath = cheminPhotoField.getText().trim();
         Nationalite nationalite = nationaliteComboBox.getSelectionModel().getSelectedItem();
 
         if (login.isEmpty() || nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || numeroSecu.isEmpty()
-                || carteIdentitePath.isEmpty() || photoPath.isEmpty()) {
+                || carteIdentitePath.isEmpty() || photoPath.isEmpty() || numTel.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Tous les champs doivent être remplis.");
             return;
         }
@@ -198,7 +209,7 @@ public class InscriptionPage {
 
         Utilisateur utilisateur = new Utilisateur(
                 nom, prenom, dateNaissance, nationalite, 0,
-                true, false, email, numeroSecu, carteIdentitePath, photoPath
+                true, false, email, numeroSecu, carteIdentitePath, photoPath, numTel
         );
 
         try {

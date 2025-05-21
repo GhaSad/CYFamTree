@@ -37,7 +37,8 @@ public class AuthentificationDAO {
                             rs.getString("email"),
                             rs.getString("numero_securite"),
                             rs.getString("carte_identite"),
-                            rs.getString("photo_numerique")
+                            rs.getString("photo_numerique"),
+                            rs.getString("num_tel") // ✅ Ajout du champ numéro de téléphone
                     );
 
                     user.setLogin(rs.getString("login"));
@@ -58,6 +59,7 @@ public class AuthentificationDAO {
 
         return null;
     }
+
 
     public void save(Utilisateur utilisateur, String login, String motDePasseClair) {
         if (userExists(login)) {

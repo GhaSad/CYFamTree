@@ -10,14 +10,16 @@ public class Utilisateur extends Personne {
     private String numeroSecurite;
     private String carteIdentite;
     private String photoNumerique;
+    private String numTel;
     private boolean doitChangerMotDePasse;
 
 
-    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite, int age, boolean estInscrit, boolean estValide, String email,String numeroSecurite, String carteIdentite, String photoNumerique) {
+    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite,int age, boolean estInscrit, boolean estValide, String email,String numeroSecurite, String carteIdentite, String photoNumerique, String numTel) {
         super(nom, prenom, dateNaissance, nationalite, age);
         this.setEstInscrit(estInscrit);
         this.estValide = estValide;
         this.email = email;
+        this.numTel = numTel;
         this.numeroSecurite = numeroSecurite;
         this.carteIdentite = carteIdentite;
         this.photoNumerique = photoNumerique;
@@ -30,7 +32,15 @@ public class Utilisateur extends Personne {
     public String getEmail() {
         return email;
     }
-    
+
+    public String getNumTel() {
+        return numTel;
+    }
+
+    public void setNumTel(String numTel) {
+        this.numTel = numTel;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
