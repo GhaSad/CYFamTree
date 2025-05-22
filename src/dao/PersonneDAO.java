@@ -8,28 +8,36 @@ import java.time.LocalDate;
 
 public class PersonneDAO {
 
-    public static int sauvegarder(Personne p) throws SQLException {
-        String sql = "INSERT INTO personne (nom, prenom, date_naissance, nationalite, age) VALUES (?, ?, ?, ?, ?)";
+	public static int sauvegarder(Personne p) throws SQLException {
+	    String sql = "INSERT INTO personne (nom, prenom, date_naissance, nationalite, age) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+	    try (Connection conn = Database.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, p.getNom());
-            stmt.setString(2, p.getPrenom());
-            stmt.setDate(3, Date.valueOf(p.getDateNaissance()));
-            stmt.setString(4, p.getNationalite().toString()); // toString() → "Français" etc.
-            stmt.setInt(5, p.getAge());
+	        stmt.setString(1, p.getNom());
+	        stmt.setString(2, p.getPrenom());
+	        stmt.setDate(3, Date.valueOf(p.getDateNaissance()));
+	        stmt.setString(4, p.getNationalite().toString());
+	        stmt.setInt(5, p.getAge());
 
-            stmt.executeUpdate();
+	        int affectedRows = stmt.executeUpdate();
 
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1); // id généré
-            }
-        }
+	        if (affectedRows == 0) {
+	            throw new SQLException("Échec de la création de la personne, aucune ligne affectée.");
+	        }
 
-        return -1; // erreur
-    }
+	        try (ResultSet rs = stmt.getGeneratedKeys()) {
+	            if (rs.next()) {
+	                int generatedId = rs.getInt(1);
+	                p.setId(generatedId);  // Fixe l'id dans l'objet Personne
+	                return generatedId;
+	            } else {
+	                throw new SQLException("Échec de la création de la personne, aucun ID généré.");
+	            }
+	        }
+	    }
+	}
+
 
     public static Personne trouverParId(int id) throws SQLException {
         String sql = "SELECT * FROM personne WHERE id_personne = ?";
