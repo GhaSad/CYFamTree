@@ -13,38 +13,25 @@ public class NoeudDAO {
         this.connection = connection;
     }
 
-    // Sauvegarder noeud (déjà ok)
-    public void sauvegarderNoeud(Noeud noeud, int idArbre) throws SQLException {
-        String sql = "INSERT INTO noeud (id_personne, visibilite, arbre_id) VALUES (?, ?, ?)";
-        Personne p = noeud.getPersonne();
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, p.getId());
-            stmt.setString(2, noeud.getVisibilite().toString());
-            stmt.setInt(3, idArbre);
-            stmt.executeUpdate();
-        }
-    }
-
-    public void ajouterArbreIdAuNoeud(Noeud noeud, int idArbre) throws SQLException {
-        String sql = "UPDATE noeud SET arbre_id = ? WHERE id_personne = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, idArbre);
-            stmt.setInt(2, noeud.getPersonne().getId());
-            stmt.executeUpdate();
-        }
-    }
-
     // Nouvelle méthode : charger tous les noeuds et leurs relations pour un arbre donné
     public void sauvegarderNoeud(Noeud noeud, int idArbre) throws SQLException {
         String sql = "INSERT INTO noeud (id_personne, visibilite, arbre_id) VALUES (?, ?, ?)";
         Personne p = noeud.getPersonne();
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, p.getId());
             stmt.setString(2, noeud.getVisibilite().toString());
             stmt.setInt(3, idArbre);
             stmt.executeUpdate();
+
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int generatedId = rs.getInt(1);
+                    noeud.setId(generatedId); // 🟢 mise à jour de l’objet Noeud
+                } else {
+                    throw new SQLException("Échec de récupération de l'ID du nœud.");
+                }
+            }
         }
     }
 

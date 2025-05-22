@@ -2,6 +2,7 @@ package view;
 
 import dao.Database;
 import dao.NoeudDAO;
+import dao.PersonneDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -72,41 +73,42 @@ public class AjoutPersonnePage {
 
             int age = Period.between(dateNaissance, LocalDate.now()).getYears();
             Personne nouvellePersonne = new Personne(nom, prenom, dateNaissance, nationalite, age);
-            Noeud nouveauNoeud = new Noeud(nouvellePersonne);
 
-            // Ajout dans l'arbre en mémoire avec la relation
-            utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien.getLibelle());
-
+// ✅ D’abord sauvegarder la personne pour obtenir son ID
             try (Connection conn = Database.getConnection()) {
-                NoeudDAO noeudDAO = new NoeudDAO(conn);
+                int idPersonne = PersonneDAO.sauvegarder(nouvellePersonne);
+                nouvellePersonne.setId(idPersonne);
 
-                // Sauvegarder le nouveau noeud en base avec idArbre
+                Noeud nouveauNoeud = new Noeud(nouvellePersonne);  // maintenant la personne a un ID
+
+                // Ajout dans l'arbre en mémoire
+                utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
+
+                NoeudDAO noeudDAO = new NoeudDAO(conn);
                 noeudDAO.sauvegarderNoeud(nouveauNoeud, utilisateur.getArbre().getId());
 
-                // Mettre à jour l'id du noeud (si auto-increment et tu peux récupérer l'id généré)
-                // Sinon, il faudra faire une requête pour récupérer l'id du noeud créé
+                // Tu peux aussi récupérer et mettre à jour l'id du noeud ici si tu veux
 
-                // Récupérer noeud source (utilisateur) en base pour avoir son id_noeud
+                // Enregistrement de la relation
                 Noeud source = utilisateur.getArbre().getNoeudParPersonne(utilisateur);
-
                 if (source != null && nouveauNoeud.getId() != 0) {
-                    // Ajouter la relation parent-enfant en base dans noeud_lien
                     String sql = "INSERT INTO noeud_lien (id_parent, id_enfant) VALUES (?, ?)";
                     try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                        int idParent = source.getId();
-                        int idEnfant = nouveauNoeud.getId();
-                        stmt.setInt(1, idParent);
-                        stmt.setInt(2, idEnfant);
+                        stmt.setInt(1, source.getId());
+                        stmt.setInt(2, nouveauNoeud.getId());
                         stmt.executeUpdate();
                     }
                 } else {
-                    System.out.println("Erreur : noeud source ou nouveau noeud non trouvé pour relation en base.");
+                    System.out.println("Erreur : source ou enfant invalide");
                 }
+
+                new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
+                stage.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
                 new Alert(Alert.AlertType.ERROR, "Erreur lors de la sauvegarde en base.").show();
-                return;
             }
+
 
             new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
             stage.close();

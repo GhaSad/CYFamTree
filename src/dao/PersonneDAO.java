@@ -16,7 +16,7 @@ public class PersonneDAO {
 
 	        stmt.setString(1, p.getNom());
 	        stmt.setString(2, p.getPrenom());
-	        stmt.setDate(3, Date.valueOf(p.getDateNaissance()));
+            stmt.setString(3, p.getDateNaissance().toString());
 	        stmt.setString(4, p.getNationalite().toString());
 	        stmt.setInt(5, p.getAge());
 

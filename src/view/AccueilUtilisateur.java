@@ -120,6 +120,10 @@ public class AccueilUtilisateur extends javafx.application.Application {
         ajouterPersonneBtn.setPrefWidth(150);
         ajouterPersonneBtn.setOnAction(e -> new AjoutPersonnePage(utilisateur).show());
 
+        Button ajouterUserBtn = new Button("Ajouter un utilisateur");
+        ajouterUserBtn.setPrefWidth(150);
+        ajouterUserBtn.setOnAction(e -> new AjoutUserPage(utilisateur).show());
+
         Button btnRessources = new Button("Ressources partagées");
         btnRessources.setOnAction(e -> new RPPage(utilisateur).show());
 
@@ -127,8 +131,9 @@ public class AccueilUtilisateur extends javafx.application.Application {
         btnRecherche.setOnAction(e -> new RecherchePage(utilisateur).show());
 
         root.getChildren().addAll(
-                ajouterPersonneBtn,
                 btnProfil,
+                ajouterPersonneBtn,
+                ajouterUserBtn,
                 btnRessources,
                 btnRecherche
         );

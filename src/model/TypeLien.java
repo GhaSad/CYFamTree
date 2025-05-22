@@ -1,21 +1,21 @@
 package model;
 
 public enum TypeLien {
-    PERE("Père"),
-    MERE("Mère"),
-    FILS("Fils"),
+    PERE("PERE"),
+    MERE("MERE"),
+    FILS("FILS"),
     FILLE("FILLE"),
-    ENFANT("Enfant"),
-    SOEUR("Soeur"),
-    FRERE("Frère"),
-    TANTE("Tante"),
-    ONCLE("Oncle"),
-    GRAND_PERE("Grand-père"),
-	GRAND_MERE("Grand-mère"),
-	NEVEU("Neveu"),
-	NIECE("Nièce"),
-	PETIT_FILS("Petit-fils"),
-	PETITE_FILLE("Petite-fille");
+    ENFANT("ENFANT"),
+    SOEUR("SOEUR"),
+    FRERE("FRERE"),
+    TANTE("TANTE"),
+    ONCLE("ONCLE"),
+    GRAND_PERE("GRAND_PERE"),
+	GRAND_MERE("GRAND_MERE"),
+	NEVEU("NEVEU"),
+	NIECE("NIECE"),
+	PETIT_FILS("PETIT_FILS"),
+	PETITE_FILLE("PETITE_FILLE");
 
     private final String libelle;
 

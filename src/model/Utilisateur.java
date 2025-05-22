@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Utilisateur extends Personne {
     private String login;           // <-- ajout
@@ -85,6 +86,19 @@ public class Utilisateur extends Personne {
         this.doitChangerMotDePasse = doitChangerMotDePasse;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Personne)) return false;
+        Personne personne = (Personne) o;
+        return this.getId() == personne.getId();  // compare via l'ID
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
+
 
     public Boolean getEstInscrit() {
         return estInscrit;
@@ -106,38 +120,35 @@ public class Utilisateur extends Personne {
         this.arbre = arbre;
     }
 
-    public void ajouterNoeudAvecLien(Noeud nouveauNoeud, String lien) {
+    public void ajouterNoeudAvecLien(Noeud nouveauNoeud, TypeLien lien) {
         if (this.arbre == null) {
             System.out.println("Erreur : l'utilisateur n'a pas encore d'arbre.");
             return;
         }
 
-        // Cherche le noeud associé à l'utilisateur
         Noeud source = arbre.getNoeudParPersonne(this);
         if (source == null) {
             System.out.println("Erreur : noeud de l'utilisateur introuvable.");
             return;
         }
 
-        // Ajout logique selon le type de lien
-        switch (lien.toLowerCase()) {
-            case "père":
-            case "mère":
-                // le nouveauNoeud est un parent du source
+        switch (lien) {
+            case PERE:
+            case MERE:
                 source.ajouterParent(nouveauNoeud);
                 break;
-            case "fils":
-            case "fille":
-                // le nouveauNoeud est un enfant du source
+            case FILS:
+            case FILLE:
                 source.ajouterEnfant(nouveauNoeud);
                 break;
             default:
-                System.out.println("Lien non reconnu. Ajouter une logique personnalisée pour : " + lien);
+                System.out.println("Lien non reconnu dans ajouterNoeudAvecLien");
                 return;
         }
 
         arbre.ajouterNoeud(nouveauNoeud);
-        System.out.println("Ajout effectué avec lien : " + lien);
+        System.out.println("✅ Lien " + lien + " ajouté entre " + source.getPersonne().getPrenom() + " et " + nouveauNoeud.getPersonne().getPrenom());
     }
+
 
 }
