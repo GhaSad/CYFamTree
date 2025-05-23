@@ -83,12 +83,22 @@ public class ArbreGenealogique {
 
     public Noeud getNoeudParPersonne(Personne personne) {
         for (Noeud n : listeNoeuds) {
-            if (n.getPersonne().equals(personne)) {
+            if (n.getPersonne() != null && n.getPersonne().equals(personne)) {
                 return n;
             }
         }
         return null;
     }
+
+    public Personne getVraieRacine() {
+        for (Noeud noeud : listeNoeuds) {
+            if (noeud.getParents().isEmpty()) {
+                return noeud.getPersonne();
+            }
+        }
+        return racine; // fallback
+    }
+
 
 
     private void afficherNoeud(Personne p, int niveau, Set<Personne> visites) {
@@ -176,32 +186,20 @@ public class ArbreGenealogique {
 
 
     public void afficherArbreGraphiqueCustom() {
+        Personne racineLogique = getVraieRacine(); // 🔁 racine du point de vue généalogique
+
         Pane pane = new Pane();
+        Map<Personne, Label> labels = new HashMap<>();
 
-        // Label racine
-        Label rootLabel = creerLabelAvecCouleur(racine);
-        rootLabel.setLayoutX(200);
-        rootLabel.setLayoutY(50);
-        pane.getChildren().add(rootLabel);
+        // Position initiale
+        double startX = 350;
+        double startY = 50;
 
-        List<Personne> enfants = getEnfants(racine);
-        int startX = 100;
+        Set<Personne> visites = new HashSet<>();
 
-        for (int i = 0; i < enfants.size(); i++) {
-            Personne enfant = enfants.get(i);
-            Label enfantLabel = creerLabelAvecCouleur(enfant);
-            enfantLabel.setLayoutX(startX + i * 150);
-            enfantLabel.setLayoutY(150);
+        dessinerRecursivement(pane, racineLogique, startX, startY, labels, visites);
 
-            Line line = new Line(
-                    rootLabel.getLayoutX() + 30, rootLabel.getLayoutY() + 20,
-                    enfantLabel.getLayoutX() + 30, enfantLabel.getLayoutY()
-            );
-
-            pane.getChildren().addAll(line, enfantLabel);
-        }
-
-        // ➕ Bouton retour en bas
+        // ➕ Bouton retour
         Button btnFermer = new Button("Fermer");
         btnFermer.setOnAction(e -> ((Stage) btnFermer.getScene().getWindow()).close());
 
@@ -210,11 +208,44 @@ public class ArbreGenealogique {
         layout.setAlignment(Pos.TOP_CENTER);
         layout.getChildren().addAll(pane, btnFermer);
 
-        Scene scene = new Scene(layout, 600, 400);
+        Scene scene = new Scene(layout, 1000, 700);
         Stage stage = new Stage();
         stage.setTitle("Arbre généalogique - Vue graphique");
         stage.setScene(scene);
         stage.show();
     }
+    private void dessinerRecursivement(Pane pane, Personne personne, double x, double y, Map<Personne, Label> labels, Set<Personne> visites) {
+        if (visites.contains(personne)) return;
+        visites.add(personne);
+
+        Label label = creerLabelAvecCouleur(personne);
+        label.setLayoutX(x);
+        label.setLayoutY(y);
+        pane.getChildren().add(label);
+        labels.put(personne, label);
+
+        List<Personne> enfants = getEnfants(personne);
+        double offsetX = -((enfants.size() - 1) * 150) / 2.0;
+
+        for (int i = 0; i < enfants.size(); i++) {
+            Personne enfant = enfants.get(i);
+            double childX = x + offsetX + i * 150;
+            double childY = y + 100;
+
+            dessinerRecursivement(pane, enfant, childX, childY, labels, visites);
+
+            Label enfantLabel = labels.get(enfant);
+            if (enfantLabel != null) {
+                Line line = new Line(
+                        x + 40, y + 30,
+                        enfantLabel.getLayoutX() + 40, enfantLabel.getLayoutY()
+                );
+                pane.getChildren().add(line);
+            }
+        }
+    }
+
+
+
 
 }

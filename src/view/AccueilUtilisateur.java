@@ -88,7 +88,14 @@ public class AccueilUtilisateur extends javafx.application.Application {
 
                     Button btnConsulterArbre = new Button("Consulter mon arbre");
                     btnConsulterArbre.setOnAction(ev -> {
-                        utilisateur.getArbre().afficherArbreGraphiqueCustom();
+                    	try {
+                    	    ArbreGenealogique arbreMisAJour = ArbreDAO.chargerArbreParUtilisateur(utilisateur);
+                    	    utilisateur.setArbre(arbreMisAJour);
+                    	    arbreMisAJour.afficherArbreGraphiqueCustom();
+                    	} catch (Exception ex) {
+                    	    ex.printStackTrace();
+                    	    new Alert(Alert.AlertType.ERROR, "Erreur lors du chargement de l'arbre.").show();
+                    	}
                     });
 
                     arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);

@@ -1,6 +1,7 @@
 package view;
 
-import dao.AuthentificationDAO;
+import dao.*;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -99,10 +100,17 @@ public class ConnexionPage {
             stage.close();
             new ChangementMDPPage(utilisateur).show();
         } else {
-            showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue " + utilisateur.getPrenom() + " !");
-            stage.close();
-            AccueilUtilisateur.show(utilisateur);
+            try {
+                utilisateur.setArbre(ArbreDAO.chargerArbreParUtilisateur(utilisateur));
+                showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue " + utilisateur.getPrenom() + " !");
+                stage.close();
+                AccueilUtilisateur.show(utilisateur);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger votre arbre généalogique.");
+            }
         }
+
     }
 
 

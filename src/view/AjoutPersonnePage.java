@@ -1,8 +1,6 @@
 package view;
 
-import dao.Database;
-import dao.NoeudDAO;
-import dao.PersonneDAO;
+import dao.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,7 +17,7 @@ import java.time.Period;
 
 public class AjoutPersonnePage {
 
-    private Utilisateur utilisateur;
+    private final Utilisateur utilisateur;
 
     public AjoutPersonnePage(Utilisateur utilisateur) {
         this.utilisateur = utilisateur;
@@ -51,7 +49,7 @@ public class AjoutPersonnePage {
 
             @Override
             public TypeLien fromString(String s) {
-                return null; // non utilisé
+                return null;
             }
         });
         lienParenteCombo.setPromptText("Sélectionnez un type de lien");
@@ -63,55 +61,70 @@ public class AjoutPersonnePage {
             String nom = nomField.getText().trim();
             String prenom = prenomField.getText().trim();
             LocalDate dateNaissance = dateNaissancePicker.getValue();
-            TypeLien lien = lienParenteCombo.getValue();
+            TypeLien typeLien = lienParenteCombo.getValue();
             Nationalite nationalite = utilisateur.getNationalite();
 
-            if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || lien == null) {
+            if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || typeLien == null) {
                 new Alert(Alert.AlertType.WARNING, "Tous les champs doivent être remplis.").show();
                 return;
             }
 
             int age = Period.between(dateNaissance, LocalDate.now()).getYears();
             Personne nouvellePersonne = new Personne(nom, prenom, dateNaissance, nationalite, age);
+            Noeud nouveauNoeud = new Noeud(nouvellePersonne);
 
-// ✅ D’abord sauvegarder la personne pour obtenir son ID
             try (Connection conn = Database.getConnection()) {
-                int idPersonne = PersonneDAO.sauvegarder(nouvellePersonne);
-                nouvellePersonne.setId(idPersonne);
+                conn.setAutoCommit(false); // ✅ une seule transaction globale
 
-                Noeud nouveauNoeud = new Noeud(nouvellePersonne);  // maintenant la personne a un ID
-
-                // Ajout dans l'arbre en mémoire
-                utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
-
+                // 1. Charger l’arbre de l’utilisateur
+                ArbreGenealogique arbreMisAJour = ArbreDAO.chargerArbreParUtilisateur(utilisateur, conn);
+                if (arbreMisAJour == null) {
+                    new Alert(Alert.AlertType.ERROR, "❌ Erreur : Impossible de charger l’arbre de l’utilisateur.").show();
+                    return;
+                }
+                utilisateur.setArbre(arbreMisAJour);
+                // 2. Sauvegarder la personne et le nœud
+                PersonneDAO.sauvegarder(nouvellePersonne, conn);
                 NoeudDAO noeudDAO = new NoeudDAO(conn);
                 noeudDAO.sauvegarderNoeud(nouveauNoeud, utilisateur.getArbre().getId());
 
-                // Tu peux aussi récupérer et mettre à jour l'id du noeud ici si tu veux
-
-                // Enregistrement de la relation
+                // 3. Lien avec le noeud de l’utilisateur
                 Noeud source = utilisateur.getArbre().getNoeudParPersonne(utilisateur);
-                if (source != null && nouveauNoeud.getId() != 0) {
-                    String sql = "INSERT INTO noeud_lien (id_parent, id_enfant) VALUES (?, ?)";
-                    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                        stmt.setInt(1, source.getId());
-                        stmt.setInt(2, nouveauNoeud.getId());
-                        stmt.executeUpdate();
-                    }
-                } else {
-                    System.out.println("Erreur : source ou enfant invalide");
+                if (source == null) throw new IllegalStateException("Noeud source introuvable.");
+
+                int idParent, idEnfant;
+                switch (typeLien) {
+                case PERE, MERE, GRAND_PERE, GRAND_MERE, TANTE, ONCLE -> {
+                    idParent = nouveauNoeud.getId();
+                    idEnfant = source.getId();
+                    source.ajouterParent(nouveauNoeud);
+                    utilisateur.getArbre().ajouterNoeud(nouveauNoeud); // ✅ AJOUT
                 }
+                default -> {
+                    idParent = source.getId();
+                    idEnfant = nouveauNoeud.getId();
+                    source.ajouterEnfant(nouveauNoeud);
+                    utilisateur.getArbre().ajouterNoeud(nouveauNoeud); // ✅ AJOUT
+                }
+            }
+
+                String sqlLien = "INSERT INTO noeud_lien (id_parent, id_enfant) VALUES (?, ?)";
+                try (PreparedStatement stmt = conn.prepareStatement(sqlLien)) {
+                    stmt.setInt(1, idParent);
+                    stmt.setInt(2, idEnfant);
+                    stmt.executeUpdate();
+                }
+
+                conn.commit(); // ✅ fin de transaction
+                utilisateur.setArbre(ArbreDAO.chargerArbreParUtilisateur(utilisateur, conn)); // 🔄 mise à jour mémoire
 
                 new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
                 stage.close();
+
             } catch (Exception ex) {
                 ex.printStackTrace();
-                new Alert(Alert.AlertType.ERROR, "Erreur lors de la sauvegarde en base.").show();
+                new Alert(Alert.AlertType.ERROR, "Erreur lors de l'ajout.").show();
             }
-
-
-            new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
-            stage.close();
         });
 
         root.getChildren().addAll(

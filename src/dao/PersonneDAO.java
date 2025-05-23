@@ -1,6 +1,7 @@
 package dao;
 
 import model.Personne;
+
 import model.Nationalite;
 
 import java.sql.*;
@@ -8,35 +9,34 @@ import java.time.LocalDate;
 
 public class PersonneDAO {
 
-	public static int sauvegarder(Personne p) throws SQLException {
+	public static int sauvegarder(Personne p, Connection conn) throws SQLException {
 	    String sql = "INSERT INTO personne (nom, prenom, date_naissance, nationalite, age) VALUES (?, ?, ?, ?, ?)";
 
-	    try (Connection conn = Database.getConnection();
-	         PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+	    try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 	        stmt.setString(1, p.getNom());
 	        stmt.setString(2, p.getPrenom());
-            stmt.setString(3, p.getDateNaissance().toString());
+	        stmt.setString(3, p.getDateNaissance().toString());
 	        stmt.setString(4, p.getNationalite().toString());
 	        stmt.setInt(5, p.getAge());
 
 	        int affectedRows = stmt.executeUpdate();
 
 	        if (affectedRows == 0) {
-	            throw new SQLException("Échec de la création de la personne, aucune ligne affectée.");
+	            throw new SQLException("Échec de la création de la personne.");
 	        }
 
 	        try (ResultSet rs = stmt.getGeneratedKeys()) {
 	            if (rs.next()) {
 	                int generatedId = rs.getInt(1);
-	                p.setId(generatedId);  // Fixe l'id dans l'objet Personne
+	                p.setId(generatedId);
 	                return generatedId;
 	            } else {
-	                throw new SQLException("Échec de la création de la personne, aucun ID généré.");
+	                throw new SQLException("Aucun ID généré.");
 	            }
 	        }
 	    }
 	}
+
 
 
     public static Personne trouverParId(int id) throws SQLException {

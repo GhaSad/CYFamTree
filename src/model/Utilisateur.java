@@ -67,8 +67,9 @@ public class Utilisateur extends Personne {
     }
 
     public void setCarteIdentite(String numeroCarteIdentite) {
-        this.carteIdentite = carteIdentite;
+        this.carteIdentite = numeroCarteIdentite;
     }
+
 
     public String getPhotoNumerique() {
         return photoNumerique;
@@ -89,15 +90,16 @@ public class Utilisateur extends Personne {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Personne)) return false;
-        Personne personne = (Personne) o;
-        return this.getId() == personne.getId();  // compare via l'ID
+        if (!(o instanceof Utilisateur)) return false;
+        Utilisateur that = (Utilisateur) o;
+        return this.getId() == that.getId();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getId());
     }
+
 
 
     public Boolean getEstInscrit() {
@@ -148,6 +150,11 @@ public class Utilisateur extends Personne {
 
         arbre.ajouterNoeud(nouveauNoeud);
         System.out.println("✅ Lien " + lien + " ajouté entre " + source.getPersonne().getPrenom() + " et " + nouveauNoeud.getPersonne().getPrenom());
+    }
+    
+    @Override
+    public String toString() {
+        return getPrenom() + " " + getNom() + " (" + login + ")";
     }
 
 

@@ -150,9 +150,10 @@ public class Personne {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Personne personne = (Personne) obj;
-        return this.getId() == personne.getId();
+        if (obj == null) return false;
+        if (!(obj instanceof Personne)) return false;
+        Personne other = (Personne) obj;
+        return this.getId() == other.getId();
     }
 
     @Override
