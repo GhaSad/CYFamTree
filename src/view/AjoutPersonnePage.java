@@ -119,7 +119,11 @@ public class AjoutPersonnePage {
                 }
 
                 new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
-                stage.close();
+
+             // 🔄 Rechargement de l’arbre pour qu’il soit à jour en mémoire
+             utilisateur.setArbre(dao.ArbreDAO.chargerArbreParUtilisateur(utilisateur));
+
+             stage.close();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
