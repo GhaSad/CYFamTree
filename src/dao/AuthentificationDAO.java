@@ -68,11 +68,13 @@ public class AuthentificationDAO {
         try (Connection conn = Database.getConnection()) {
             conn.setAutoCommit(false);
 
+            // 1. Ajouter utilisateur
             String sqlUtilisateur = "INSERT INTO utilisateur(" +
                     "login, mot_de_passe, nom, prenom, date_naissance, nationalite, " +
                     "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique" +
                     ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+            int idUtilisateur = -1;
             try (PreparedStatement pstmt = conn.prepareStatement(sqlUtilisateur, Statement.RETURN_GENERATED_KEYS)) {
                 String hash = BCrypt.hashpw(utilisateur.getPrenom().toLowerCase(), BCrypt.gensalt());
 
@@ -83,7 +85,7 @@ public class AuthentificationDAO {
                 pstmt.setString(5, utilisateur.getDateNaissance().toString());
                 pstmt.setString(6, utilisateur.getNationalite().name());
                 pstmt.setInt(7, utilisateur.getEstInscrit() ? 1 : 0);
-                pstmt.setInt(8, 0); // est_valide = false
+                pstmt.setInt(8, 0); // non validé
                 pstmt.setInt(9, 1); // doit changer mdp
                 pstmt.setString(10, utilisateur.getEmail());
                 pstmt.setString(11, utilisateur.getNumeroSecurite());
@@ -94,32 +96,40 @@ public class AuthentificationDAO {
 
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        int id = rs.getInt(1);
-                        utilisateur.setId(id);
-
-                        String sqlPersonne = "INSERT INTO personne(id_personne, nom, prenom, date_naissance, nationalite, age) VALUES (?, ?, ?, ?, ?, ?)";
-
-                        try (PreparedStatement stmtPersonne = conn.prepareStatement(sqlPersonne)) {
-                            stmtPersonne.setInt(1, id);
-                            stmtPersonne.setString(2, utilisateur.getNom());
-                            stmtPersonne.setString(3, utilisateur.getPrenom());
-                            stmtPersonne.setString(4, utilisateur.getDateNaissance().toString());
-                            stmtPersonne.setString(5, utilisateur.getNationalite().name());
-                            stmtPersonne.setInt(6, utilisateur.getAge());
-
-                            stmtPersonne.executeUpdate();
-                        }
-
-                        System.out.println("✅ Utilisateur et personne associés (id = " + id + ")");
+                        idUtilisateur = rs.getInt(1);
+                        utilisateur.setId(idUtilisateur);
+                    } else {
+                        throw new SQLException("Échec génération ID utilisateur.");
                     }
                 }
             }
 
-            conn.commit(); // 🔒 fin de transaction
+            // 2. Ajouter personne sans spécifier id_personne (laisser SQLite l’attribuer)
+            String sqlPersonne = "INSERT INTO personne(nom, prenom, date_naissance, nationalite, age) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement stmtPersonne = conn.prepareStatement(sqlPersonne, Statement.RETURN_GENERATED_KEYS)) {
+                stmtPersonne.setString(1, utilisateur.getNom());
+                stmtPersonne.setString(2, utilisateur.getPrenom());
+                stmtPersonne.setString(3, utilisateur.getDateNaissance().toString());
+                stmtPersonne.setString(4, utilisateur.getNationalite().name());
+                stmtPersonne.setInt(5, utilisateur.getAge());
+
+                stmtPersonne.executeUpdate();
+
+                try (ResultSet rs = stmtPersonne.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int idPersonne = rs.getInt(1);
+                        System.out.println("✅ Personne enregistrée avec ID = " + idPersonne);
+                    }
+                }
+            }
+
+            conn.commit();
+            System.out.println("✅ Utilisateur et personne enregistrés avec succès.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public boolean userExists(String login) {
         String sql = "SELECT COUNT(*) FROM utilisateur WHERE login = ?";
