@@ -208,6 +208,26 @@ public class InscriptionPage {
             return;
         }
 
+        if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Format d'email invalide.");
+            return;
+        }
+
+        // Numéro de sécurité sociale (13 chiffres, éventuellement séparés par espaces)
+        if (!numeroSecu.matches("^\\d{13}$") && !numeroSecu.matches("^(\\d{1} \\d{2} \\d{2} \\d{2} \\d{3} \\d{3})$")) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Numéro de sécurité sociale invalide. Format attendu : 1 23 45 67 890 123");
+            return;
+        }
+
+        // Numéro de téléphone français
+        if (!numTel.matches("^\\d{10}$") && !numTel.matches("^(\\d{2} ){4}\\d{2}$")) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Numéro de téléphone invalide. Format attendu : 06 12 34 56 78");
+            return;
+        }
+
+        numeroSecu = numeroSecu.replaceAll("\\s+", "");
+        numTel = numTel.replaceAll("\\s+", "");
+
         Utilisateur utilisateur = new Utilisateur(
                 nom, prenom, dateNaissance, nationalite, 0,
                 true, false, email, numeroSecu, carteIdentitePath, photoPath, numTel

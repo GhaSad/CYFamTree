@@ -1,6 +1,7 @@
 package view;
 
 import dao.ArbreDAO;
+import dao.ConsultationDAO;
 import dao.UtilisateurDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,9 +10,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import model.ArbreGenealogique;
+import model.Consultation;
 import model.Nationalite;
 import model.Utilisateur;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class RecherchePage {
@@ -114,13 +117,16 @@ public class RecherchePage {
 
 
             btnAfficher.setOnAction(e -> {
+                // Enregistre la consultation d'arbre
+                Consultation consultation = new Consultation(utilisateur, u, LocalDateTime.now());
+                ConsultationDAO.enregistrerConsultation(consultation);
+
                 ArbreGenealogique arbre = ArbreDAO.chargerArbreParUtilisateur(u);
                 u.setArbre(arbre);
                 if (arbre != null) {
                     arbre.afficherArbreGraphiqueCustom();
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Cet utilisateur n'a pas encore d'arbre.");
-                    alert.show();
+                    new Alert(Alert.AlertType.INFORMATION, "Cet utilisateur n'a pas encore d'arbre.").show();
                 }
             });
 

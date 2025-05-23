@@ -3,10 +3,15 @@ package view;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Utilisateur;
 import dao.UtilisateurDAO;
+
+import java.io.File;
+import java.io.FileInputStream;
 
 public class ProfilPage {
 
@@ -22,6 +27,22 @@ public class ProfilPage {
 
         VBox root = new VBox(10);
         root.setPadding(new Insets(20));
+
+        try {
+            File photoFile = new File(utilisateur.getPhotoNumerique());
+            if (photoFile.exists()) {
+                Image image = new Image(new FileInputStream(photoFile));
+                ImageView imageView = new ImageView(image);
+                imageView.setFitWidth(150);
+                imageView.setPreserveRatio(true);
+                root.getChildren().add(imageView);
+            } else {
+                root.getChildren().add(new Label("📸 Photo non disponible"));
+            }
+        } catch (Exception e) {
+            root.getChildren().add(new Label("⚠️ Erreur lors du chargement de la photo"));
+            e.printStackTrace();
+        }
 
         // Champs non modifiables (Label au lieu de TextField)
         Label nomLabel = new Label("Nom : " + utilisateur.getNom());

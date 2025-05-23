@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import model.Utilisateur;
 
+import java.io.File;
 import java.util.List;
 
 public class AdminPage {
@@ -71,6 +72,31 @@ public class AdminPage {
             return new javafx.beans.property.SimpleStringProperty(estValide ? "Validé" : "En attente");
         });
 
+        TableColumn<Utilisateur, Void> fichiersCol = new TableColumn<>("Fichiers");
+        fichiersCol.setCellFactory(col -> new TableCell<>() {
+            private final Button btnVoir = new Button("Voir fichiers");
+
+            {
+                btnVoir.setOnAction(e -> {
+                    Utilisateur utilisateur = getTableView().getItems().get(getIndex());
+                    ouvrirFichiersUtilisateur(utilisateur);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnVoir);
+                }
+            }
+        });
+
+        tableView.getColumns().add(fichiersCol);
+
+
         tableView.getColumns().addAll(loginCol, nomCol, prenomCol, dateNaissanceCol, nationaliteCol, valideCol);
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
@@ -99,6 +125,31 @@ public class AdminPage {
         stage.setScene(scene);
         stage.centerOnScreen();
         stage.show();
+    }
+
+    private void ouvrirFichiersUtilisateur(Utilisateur u) {
+        try {
+            if (u.getCarteIdentite() != null && !u.getCarteIdentite().isBlank()) {
+                File carte = new File(u.getCarteIdentite());
+                if (carte.exists()) {
+                    java.awt.Desktop.getDesktop().open(carte);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "Fichier manquant", null, "La carte d'identité n'existe pas à l'emplacement indiqué.");
+                }
+            }
+
+            if (u.getPhotoNumerique() != null && !u.getPhotoNumerique().isBlank()) {
+                File photo = new File(u.getPhotoNumerique());
+                if (photo.exists()) {
+                    java.awt.Desktop.getDesktop().open(photo);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "Fichier manquant", null, "La photo numérique n'existe pas à l'emplacement indiqué.");
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur", null, "Impossible d'ouvrir les fichiers.");
+        }
     }
 
     private void chargerUtilisateurs() {

@@ -134,13 +134,18 @@ public class AccueilUtilisateur extends javafx.application.Application {
         Button btnRecherche = new Button("Recherche par critère");
         btnRecherche.setOnAction(e -> new RecherchePage(utilisateur).show());
 
+        Button btnHistorique = new Button("Historique consultations");
+        btnHistorique.setOnAction(e -> new HistoriqueConsultationPage(utilisateur).show());
+
         root.getChildren().addAll(
                 btnProfil,
                 ajouterPersonneBtn,
                 ajouterUserBtn,
                 btnRessources,
-                btnRecherche
+                btnRecherche,
+                btnHistorique
         );
+
 
         Scene scene = new Scene(root, 400, 300);
         stage.setScene(scene);

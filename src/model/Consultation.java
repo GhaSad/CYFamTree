@@ -1,28 +1,43 @@
 package model;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Consultation {
-    private int id; // facultatif mais bon pour la base
-    private Date dateConsultation;
+    private int id;
     private Utilisateur utilisateurConsulteur;
+    private Utilisateur utilisateurCible;
+    private LocalDateTime date;
 
-    public Consultation(Utilisateur utilisateurConsulteur) {
-        this.utilisateurConsulteur = utilisateurConsulteur;
-        this.dateConsultation = new Date();
+    public Consultation(Utilisateur consulteur, Utilisateur cible, LocalDateTime date) {
+        this.utilisateurConsulteur = consulteur;
+        this.utilisateurCible = cible;
+        this.date = date;
     }
 
-    public Date getDateConsultation() {
-        return dateConsultation;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Utilisateur getUtilisateurConsulteur() {
         return utilisateurConsulteur;
     }
 
-    public String getFormattedDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdf.format(dateConsultation);
+    public Utilisateur getUtilisateurCible() {
+        return utilisateurCible;
     }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public String getFormattedDate() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return date.format(formatter);
+    }
+
 }
