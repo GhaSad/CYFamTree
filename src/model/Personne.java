@@ -15,7 +15,7 @@ public class Personne {
     boolean estInscrit = false;
 
     public Personne(String nom, String prenom, LocalDate date, Nationalite nationalite, int age) {
-        this.id = ++compteurId;
+        //this.id = ++compteurId;
     	this.nom = nom;
         this.prenom = prenom;
         this.dateNaissance = date;
@@ -23,6 +23,10 @@ public class Personne {
         this.Age = age;
         liens = new ArrayList<>();
     }
+    public int getId() {
+        return id;
+    }
+
     public boolean estInscrit() {
         return estInscrit;
     }
@@ -30,10 +34,15 @@ public class Personne {
     public void setEstInscrit(boolean estInscrit) {
         this.estInscrit = estInscrit;
     }
-    
-    public int getId() {
-        return id;
+
+    public void setDateNaissance(LocalDate dateNaissance) {
+        this.dateNaissance = dateNaissance;
     }
+
+    public void setNationalite(Nationalite nationalite) {
+        this.nationalite = nationalite;
+    }
+
 
     public LocalDate getDateNaissance() {
         return dateNaissance;

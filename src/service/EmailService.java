@@ -8,8 +8,8 @@ import java.util.Properties;
 public class EmailService {
 
     public static void envoyerMail(String destinataire, String sujet, String corps) {
-        final String expediteur = "ghalisadiqi23@gmail.com";     // ⚠️ met ton email
-        final String motDePasse = "nkeemmmdwwkezcjk ";         // ⚠️ mot de passe d'application
+        final String expediteur = "cyfamtree@gmail.com";     // ⚠️ met ton email
+        final String motDePasse = "upvvgnywqvpaxmug   ";         // ⚠️ mot de passe d'application
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");

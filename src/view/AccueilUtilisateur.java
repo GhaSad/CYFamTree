@@ -28,7 +28,10 @@ public class AccueilUtilisateur extends javafx.application.Application {
 
         // Chargement complet de l'arbre depuis la base
         ArbreGenealogique arbre = ArbreDAO.chargerArbreParUtilisateur(this.utilisateur);
+        // On retrouve la vraie personne associée à l’utilisateur
+        Personne vraiePersonne = PersonneDAO.trouverParUtilisateurId(utilisateur.getId());
         this.utilisateur.setArbre(arbre);
+
 
         stage.setTitle("Accueil - Arbre Généalogique");
 
@@ -53,12 +56,17 @@ public class AccueilUtilisateur extends javafx.application.Application {
             creerBtn.setOnAction(e -> {
                 try {
                     if (utilisateur.getArbre() != null) {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Vous avez déjà un arbre.");
-                        alert.show();
+                        new Alert(Alert.AlertType.INFORMATION, "Vous avez déjà un arbre.").show();
                         return;
                     }
 
-                    Personne personneRacine = utilisateur;
+                    // ✅ Récupérer la vraie personne associée à l'utilisateur
+                    Personne personneRacine = PersonneDAO.trouverParUtilisateurId(utilisateur.getId());
+                    if (personneRacine == null) {
+                        new Alert(Alert.AlertType.ERROR, "Impossible de retrouver les informations de la personne liée à l'utilisateur.").show();
+                        return;
+                    }
+
                     Noeud racine = new Noeud(personneRacine);
 
                     try (Connection conn = Database.getConnection()) {
@@ -80,23 +88,10 @@ public class AccueilUtilisateur extends javafx.application.Application {
 
                     arbre1.afficherArbreGraphiqueCustom();
 
-                    // Actualiser la zone arbreBox avec le nouveau contenu
                     arbreBox.getChildren().clear();
-
                     Label arbreInfo = new Label("🌳 Vous avez déjà un arbre généalogique.");
-                    arbreInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #228B22;");
-
                     Button btnConsulterArbre = new Button("Consulter mon arbre");
-                    btnConsulterArbre.setOnAction(ev -> {
-                    	try {
-                    	    ArbreGenealogique arbreMisAJour = ArbreDAO.chargerArbreParUtilisateur(utilisateur);
-                    	    utilisateur.setArbre(arbreMisAJour);
-                    	    arbreMisAJour.afficherArbreGraphiqueCustom();
-                    	} catch (Exception ex) {
-                    	    ex.printStackTrace();
-                    	    new Alert(Alert.AlertType.ERROR, "Erreur lors du chargement de l'arbre.").show();
-                    	}
-                    });
+                    btnConsulterArbre.setOnAction(ev -> utilisateur.getArbre().afficherArbreGraphiqueCustom());
 
                     arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);
 
@@ -106,6 +101,7 @@ public class AccueilUtilisateur extends javafx.application.Application {
                 }
             });
 
+
             arbreBox.getChildren().addAll(info, creerBtn);
 
         } else {
@@ -113,7 +109,8 @@ public class AccueilUtilisateur extends javafx.application.Application {
             arbreInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #228B22;");
 
             Button btnConsulterArbre = new Button("Consulter mon arbre");
-            btnConsulterArbre.setOnAction(e -> utilisateur.getArbre().afficherArbreGraphiqueCustom());
+            btnConsulterArbre.setOnAction(e -> {utilisateur.getArbre().afficherArbreGraphiqueCustom();
+                utilisateur.getArbre().afficherTexte();});
 
             arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);
         }
