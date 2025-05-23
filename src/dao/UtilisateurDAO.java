@@ -206,7 +206,7 @@ public class UtilisateurDAO {
                         rs.getInt("est_valide") == 1,
                         rs.getString("email"),
                         rs.getString("numero_securite"),
-                        rs.getString("numero_carte"),
+                        rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
                         rs.getString("num_tel") // ✅ ajout du nouveau champ ici
                 );

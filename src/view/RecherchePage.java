@@ -1,5 +1,6 @@
 package view;
 
+import dao.ArbreDAO;
 import dao.UtilisateurDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -83,6 +84,16 @@ public class RecherchePage {
         String prenom = prenomField.getText().trim();
         Nationalite nat = nationaliteComboBox.getValue();
 
+        // 🛑 Vérification des 3 champs obligatoires
+        if (nom.isEmpty() || prenom.isEmpty() || nat == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Champs manquants");
+            alert.setHeaderText("Veuillez remplir tous les champs !");
+            alert.setContentText("Le nom, le prénom et la nationalité sont obligatoires pour effectuer une recherche.");
+            alert.show();
+            return;
+        }
+
         UtilisateurDAO dao = new UtilisateurDAO();
         List<Utilisateur> resultats = dao.rechercherParCritere(nom, prenom, nat);
 
@@ -98,8 +109,13 @@ public class RecherchePage {
             Label info = new Label(u.getPrenom() + " " + u.getNom() + " (" + u.getNationalite() + ")");
             Button btnAfficher = new Button("Afficher arbre");
 
+            Button btnAfficherProfil = new Button("Afficher profil");
+            btnAfficherProfil.setOnAction(ev -> new ProfileLectureSeulePage(u).show());
+
+
             btnAfficher.setOnAction(e -> {
-                ArbreGenealogique arbre = u.getArbre();
+                ArbreGenealogique arbre = ArbreDAO.chargerArbreParUtilisateur(u);
+                u.setArbre(arbre);
                 if (arbre != null) {
                     arbre.afficherArbreGraphiqueCustom();
                 } else {
@@ -108,10 +124,11 @@ public class RecherchePage {
                 }
             });
 
-            carte.getChildren().addAll(info, btnAfficher);
+            carte.getChildren().addAll(info, btnAfficherProfil, btnAfficher);
             resultBox.getChildren().add(carte);
         }
     }
+
 
     public void show() {
         stage.show();

@@ -72,8 +72,8 @@ public class AuthentificationDAO {
             // 1. Insertion dans la table utilisateur
             String sqlUtilisateur = "INSERT INTO utilisateur(" +
                     "login, mot_de_passe, nom, prenom, date_naissance, nationalite, " +
-                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique, num_tel" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
 
             int idUtilisateur;
 
@@ -94,6 +94,7 @@ public class AuthentificationDAO {
                 pstmt.setString(11, utilisateur.getNumeroSecurite());
                 pstmt.setString(12, utilisateur.getCarteIdentite());
                 pstmt.setString(13, utilisateur.getPhotoNumerique());
+                pstmt.setString(14, utilisateur.getNumTel());
 
                 pstmt.executeUpdate();
 
