@@ -90,7 +90,11 @@ public class AccueilUtilisateur extends javafx.application.Application {
                     arbreBox.getChildren().clear();
                     Label arbreInfo = new Label("Vous avez déjà un arbre généalogique.");
                     Button btnConsulterArbre = new Button("Consulter mon arbre");
-                    btnConsulterArbre.setOnAction(ev -> utilisateur.getArbre().afficherArbreGraphiqueCustomComplet(utilisateur));
+                    btnConsulterArbre.setOnAction(ev -> {
+                        utilisateur.getArbre().afficherArbreGraphiqueCustomComplet(utilisateur.getPersonne());
+                        utilisateur.getArbre().afficherArbreCompletDepuisToutesRacines();
+                    });
+
 
                     arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);
 
