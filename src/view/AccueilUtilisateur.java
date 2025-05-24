@@ -46,7 +46,7 @@ public class AccueilUtilisateur extends javafx.application.Application {
         arbreBox.setPadding(new Insets(20));
 
         if (utilisateur.getArbre() == null) {
-            Label info = new Label("😕 Vous n'avez pas encore d'arbre généalogique.");
+            Label info = new Label("Vous n'avez pas encore d'arbre généalogique.");
             info.setStyle("-fx-font-size: 14px; -fx-text-fill: #444;");
 
             Button creerBtn = new Button("Créer mon arbre");
@@ -88,9 +88,9 @@ public class AccueilUtilisateur extends javafx.application.Application {
                     arbre1.afficherArbreGraphiqueCustom();
 
                     arbreBox.getChildren().clear();
-                    Label arbreInfo = new Label("🌳 Vous avez déjà un arbre généalogique.");
+                    Label arbreInfo = new Label("Vous avez déjà un arbre généalogique.");
                     Button btnConsulterArbre = new Button("Consulter mon arbre");
-                    btnConsulterArbre.setOnAction(ev -> utilisateur.getArbre().afficherArbreGraphiqueCustom());
+                    btnConsulterArbre.setOnAction(ev -> utilisateur.getArbre().afficherArbreGraphiqueCustomComplet(utilisateur));
 
                     arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);
 
@@ -104,13 +104,13 @@ public class AccueilUtilisateur extends javafx.application.Application {
             arbreBox.getChildren().addAll(info, creerBtn);
 
         } else {
-            Label arbreInfo = new Label("🌳 Vous avez déjà un arbre généalogique.");
+            Label arbreInfo = new Label("Vous avez déjà un arbre généalogique.");
             arbreInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #228B22;");
 
             Button btnConsulterArbre = new Button("Consulter mon arbre complet");
             btnConsulterArbre.setOnAction(e -> {
                 utilisateur.getArbre().afficherArbreGraphiqueCustomComplet(utilisateur);
-                utilisateur.getArbre().afficherArbreCompletDepuisToutesRacines();; // Optionnel : garde si tu veux aussi l'affichage console
+                utilisateur.getArbre().afficherArbreCompletDepuisToutesRacines();;
             });
 
             arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);
