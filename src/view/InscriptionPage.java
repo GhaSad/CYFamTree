@@ -17,6 +17,7 @@ import service.EmailService;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Random;
 
 public class InscriptionPage {
 
@@ -59,10 +60,6 @@ public class InscriptionPage {
         form.setHgap(10);
         form.setVgap(12);
         form.setAlignment(Pos.CENTER);
-
-        Label loginLabel = new Label("Login :");
-        loginField = new TextField();
-        loginField.setPromptText("Choisissez un login");
 
         Label nomLabel = new Label("Nom :");
         nomField = new TextField();
@@ -119,10 +116,6 @@ public class InscriptionPage {
             File fichier = fileChooser.showOpenDialog(stage);
             if (fichier != null) cheminPhotoField.setText(fichier.getAbsolutePath());
         });
-
-        // Positionnement des éléments
-        form.add(loginLabel, 0, 0);
-        form.add(loginField, 1, 0);
 
         form.add(nomLabel, 0, 2);
         form.add(nomField, 1, 2);
@@ -181,9 +174,10 @@ public class InscriptionPage {
 
 
     private void handleRegister() {
-        String login = loginField.getText().trim();
         String nom = nomField.getText().trim();
         String prenom = prenomField.getText().trim();
+        String login = (prenom + nom).toLowerCase().replaceAll("\\s+", "") + (int)(Math.random() * 90 + 10); // 2 chiffres aléatoires
+        String codePublic = "CY" + String.format("%04d", new Random().nextInt(10000));
         String email = emailField.getText().trim();
         String numeroSecu = numeroSecuField.getText().trim();
         String numTel = numTelField.getText().trim();
@@ -208,9 +202,29 @@ public class InscriptionPage {
             return;
         }
 
+        if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,6}$")) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Format d'email invalide.");
+            return;
+        }
+
+        // Numéro de sécurité sociale (13 chiffres, éventuellement séparés par espaces)
+        if (!numeroSecu.matches("^\\d{13}$") && !numeroSecu.matches("^(\\d{1} \\d{2} \\d{2} \\d{2} \\d{3} \\d{3})$")) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Numéro de sécurité sociale invalide. Format attendu : 1 23 45 67 890 123");
+            return;
+        }
+
+        // Numéro de téléphone français
+        if (!numTel.matches("^\\d{10}$") && !numTel.matches("^(\\d{2} ){4}\\d{2}$")) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Numéro de téléphone invalide. Format attendu : 06 12 34 56 78");
+            return;
+        }
+
+        numeroSecu = numeroSecu.replaceAll("\\s+", "");
+        numTel = numTel.replaceAll("\\s+", "");
+
         Utilisateur utilisateur = new Utilisateur(
                 nom, prenom, dateNaissance, nationalite, 0,
-                true, false, email, numeroSecu, carteIdentitePath, photoPath, numTel
+                true, false, email, numeroSecu, carteIdentitePath, photoPath, numTel,codePublic
         );
 
         try {
@@ -218,8 +232,13 @@ public class InscriptionPage {
             EmailService.envoyerMail(
                     email,
                     "Bienvenue sur CYFamTree !",
-                    "Bonjour " + prenom + ",\n\nMerci pour votre inscription sur CYFamTree.\n" +
-                            "Votre mot de passe initial est : " + prenom + "\n\nVotre compte sera validé sous peu.\n\nL'équipe CYFamTree"
+                    "Bonjour " + prenom + ",\n\n" +
+                            "Merci pour votre inscription sur CYFamTree.\n\n" +
+                            "🆔 Votre code privé (login) : " + login + "\n" +
+                            "🔑 Votre mot de passe initial : " + prenom + "\n" +
+                            "🌐 Votre code public : " + codePublic + "\n\n" +
+                            "Votre compte sera validé sous peu par un administrateur.\n\n" +
+                            "L'équipe CYFamTree"
             );
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Inscription enregistrée !\nMot de passe initial : votre prénom.");
             stage.close();

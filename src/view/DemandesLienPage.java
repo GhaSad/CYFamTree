@@ -10,6 +10,16 @@ import model.LienEnAttente;
 import model.Personne;
 import service.LienManager;
 import model.Utilisateur;
+import model.ArbreGenealogique;
+import model.Noeud;
+import model.TypeLien;
+import dao.NoeudDAO;
+import dao.Database;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+
 
 public class DemandesLienPage {
 
@@ -35,6 +45,59 @@ public class DemandesLienPage {
 
             accepter.setOnAction(e -> {
                 LienManager.validerDemande(demande);
+
+                Utilisateur demandeur = (Utilisateur) demande.getDemandeur(); // celui qui a envoyé la demande
+                Utilisateur cible = utilisateur;                               // celui qui accepte
+                TypeLien lien = demande.getTypeLien();
+
+                ArbreGenealogique arbreDemandeur = demandeur.getArbre();
+                Noeud noeudCible = arbreDemandeur.getNoeudParPersonne(cible);
+
+                if (noeudCible == null) {
+                    noeudCible = new Noeud(cible);
+                    arbreDemandeur.ajouterNoeud(noeudCible);
+                    try (Connection conn = Database.getConnection()) {
+                        NoeudDAO dao = new NoeudDAO(conn);
+                        dao.sauvegarderNoeud(noeudCible, arbreDemandeur.getId());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                Noeud racine = arbreDemandeur.getNoeudParPersonne(demandeur);
+                if (racine != null) {
+                    switch (lien) {
+                        case PERE:
+                        case MERE:
+                            racine.ajouterParent(noeudCible);
+                            break;
+                        case FILS:
+                        case FILLE:
+                            racine.ajouterEnfant(noeudCible);
+                            break;
+                        default:
+                            System.out.println("⚠️ Type de lien non géré automatiquement.");
+                    }
+
+                    try (Connection conn = Database.getConnection()) {
+                        String sql = "INSERT INTO noeud_lien (id_parent, id_enfant, arbre_id) VALUES (?, ?, ?)";
+                        PreparedStatement stmt = conn.prepareStatement(sql);
+
+                        if (lien == TypeLien.PERE || lien == TypeLien.MERE) {
+                            stmt.setInt(1, noeudCible.getId());
+                            stmt.setInt(2, racine.getId());
+                        } else if (lien == TypeLien.FILS || lien == TypeLien.FILLE) {
+                            stmt.setInt(1, racine.getId());
+                            stmt.setInt(2, noeudCible.getId());
+                        }
+                        stmt.setInt(3, arbreDemandeur.getId());
+                        stmt.executeUpdate();
+                        stmt.close();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
                 root.getChildren().remove(labelBox);
             });
 

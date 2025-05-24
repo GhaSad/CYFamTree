@@ -31,7 +31,9 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel")
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
+
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -64,7 +66,8 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel")
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -109,7 +112,8 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel")
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
                 );
                 u.setId(rs.getInt("id"));
                 u.setLogin(rs.getString("login"));
@@ -149,7 +153,6 @@ public class UtilisateurDAO {
             e.printStackTrace();
         }
     }
-
 
     public static void updateMotDePasse(String login, String nouveauMdp) {
         String hash = BCrypt.hashpw(nouveauMdp, BCrypt.gensalt());
@@ -206,9 +209,10 @@ public class UtilisateurDAO {
                         rs.getInt("est_valide") == 1,
                         rs.getString("email"),
                         rs.getString("numero_securite"),
-                        rs.getString("numero_carte"),
+                        rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel") // ✅ ajout du nouveau champ ici
+                        rs.getString("num_tel"), // ✅ ajout du nouveau champ ici
+                        rs.getString("code_public")
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -221,5 +225,94 @@ public class UtilisateurDAO {
 
         return utilisateurs;
     }
+
+    public static Utilisateur trouverParId(int id) {
+        String sql = "SELECT * FROM utilisateur WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String nom = rs.getString("nom");
+                String prenom = rs.getString("prenom");
+                LocalDate dateNaissance = LocalDate.parse(rs.getString("date_naissance"));
+                String nationaliteStr = rs.getString("nationalite");
+                Nationalite nationalite = Nationalite.valueOf(nationaliteStr.toUpperCase());
+                String email = rs.getString("email");
+                String numSec = rs.getString("numero_securite"); // ou num_tel selon ton schéma
+                String carteId = rs.getString("carte_identite");
+                String photo = rs.getString("photo_numerique");
+                String numTel = rs.getString("num_tel");
+                String code_public = rs.getString("code_public");
+
+                Utilisateur utilisateur = new Utilisateur(
+                        nom,
+                        prenom,
+                        dateNaissance,
+                        nationalite,
+                        LocalDate.now().getYear() - dateNaissance.getYear(),
+                        true, // estInscrit
+                        rs.getInt("est_valide") == 1,
+                        email,
+                        numSec,
+                        carteId,
+                        photo,
+                        numTel,
+                        code_public// ou remplacer si tu as un champ "num_tel"
+                );
+                utilisateur.setId(id);
+                utilisateur.setLogin(rs.getString("login"));
+                utilisateur.setDoitChangerMotDePasse(rs.getInt("doit_changer_mdp") == 1);
+
+                return utilisateur;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public Optional<Utilisateur> trouverParCodePublic(String code) {
+        String sql = "SELECT * FROM utilisateur WHERE code_public = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, code);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Utilisateur u = new Utilisateur(
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        LocalDate.parse(rs.getString("date_naissance")),
+                        Nationalite.valueOf(rs.getString("nationalite")),
+                        0,
+                        rs.getInt("est_inscrit") == 1,
+                        rs.getInt("est_valide") == 1,
+                        rs.getString("email"),
+                        rs.getString("numero_securite"),
+                        rs.getString("carte_identite"),
+                        rs.getString("photo_numerique"),
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
+                );
+                u.setLogin(rs.getString("login"));
+                u.setId(rs.getInt("id"));
+                return Optional.of(u);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
+
 
 }

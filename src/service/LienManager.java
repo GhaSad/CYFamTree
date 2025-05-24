@@ -3,6 +3,7 @@ package service;
 import model.LienEnAttente;
 import model.Personne;
 import model.TypeLien;
+import model.Utilisateur;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,17 @@ public class LienManager {
 
         demandesEnAttente.remove(demande);
     }
+
+    public static List<LienEnAttente> getDemandesPour(Utilisateur cible) {
+        List<LienEnAttente> result = new ArrayList<>();
+        for (LienEnAttente d : demandesEnAttente) {
+            if (d.getCible() instanceof Utilisateur && d.getCible().equals(cible)) {
+                result.add(d);
+            }
+        }
+        return result;
+    }
+
 
 
     public static void refuserDemande(LienEnAttente demande) {

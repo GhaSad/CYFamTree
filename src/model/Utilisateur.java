@@ -12,10 +12,12 @@ public class Utilisateur extends Personne {
     private String carteIdentite;
     private String photoNumerique;
     private String numTel;
+    private String codePublic;
     private boolean doitChangerMotDePasse;
 
 
-    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite,int age, boolean estInscrit, boolean estValide, String email,String numeroSecurite, String carteIdentite, String photoNumerique, String numTel) {
+    public Utilisateur(String nom, String prenom, LocalDate dateNaissance, Nationalite nationalite,int age, boolean estInscrit, boolean estValide,
+                       String email,String numeroSecurite, String carteIdentite, String photoNumerique, String numTel,String codePublic) {
         super(nom, prenom, dateNaissance, nationalite, age);
         this.setEstInscrit(estInscrit);
         this.estValide = estValide;
@@ -24,6 +26,7 @@ public class Utilisateur extends Personne {
         this.numeroSecurite = numeroSecurite;
         this.carteIdentite = carteIdentite;
         this.photoNumerique = photoNumerique;
+        this.codePublic = codePublic;
     }
 
     public String getLogin() {
@@ -32,6 +35,14 @@ public class Utilisateur extends Personne {
     
     public String getEmail() {
         return email;
+    }
+
+    public String getCodePublic(){
+        return this.codePublic;
+    }
+
+    public void setCodePublic(String codePublic) {
+        this.codePublic = codePublic;
     }
 
     public String getNumTel() {

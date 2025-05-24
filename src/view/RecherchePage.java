@@ -1,5 +1,7 @@
 package view;
 
+import dao.ArbreDAO;
+import dao.ConsultationDAO;
 import dao.UtilisateurDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,9 +10,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import model.ArbreGenealogique;
+import model.Consultation;
 import model.Nationalite;
 import model.Utilisateur;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class RecherchePage {
@@ -83,6 +87,16 @@ public class RecherchePage {
         String prenom = prenomField.getText().trim();
         Nationalite nat = nationaliteComboBox.getValue();
 
+        // 🛑 Vérification des 3 champs obligatoires
+        if (nom.isEmpty() || prenom.isEmpty() || nat == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Champs manquants");
+            alert.setHeaderText("Veuillez remplir tous les champs !");
+            alert.setContentText("Le nom, le prénom et la nationalité sont obligatoires pour effectuer une recherche.");
+            alert.show();
+            return;
+        }
+
         UtilisateurDAO dao = new UtilisateurDAO();
         List<Utilisateur> resultats = dao.rechercherParCritere(nom, prenom, nat);
 
@@ -98,20 +112,29 @@ public class RecherchePage {
             Label info = new Label(u.getPrenom() + " " + u.getNom() + " (" + u.getNationalite() + ")");
             Button btnAfficher = new Button("Afficher arbre");
 
+            Button btnAfficherProfil = new Button("Afficher profil");
+            btnAfficherProfil.setOnAction(ev -> new ProfileLectureSeulePage(u).show());
+
+
             btnAfficher.setOnAction(e -> {
-                ArbreGenealogique arbre = u.getArbre();
+                // Enregistre la consultation d'arbre
+                Consultation consultation = new Consultation(utilisateur, u, LocalDateTime.now());
+                ConsultationDAO.enregistrerConsultation(consultation);
+
+                ArbreGenealogique arbre = ArbreDAO.chargerArbreParUtilisateur(u);
+                u.setArbre(arbre);
                 if (arbre != null) {
                     arbre.afficherArbreGraphiqueCustom();
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Cet utilisateur n'a pas encore d'arbre.");
-                    alert.show();
+                    new Alert(Alert.AlertType.INFORMATION, "Cet utilisateur n'a pas encore d'arbre.").show();
                 }
             });
 
-            carte.getChildren().addAll(info, btnAfficher);
+            carte.getChildren().addAll(info, btnAfficherProfil, btnAfficher);
             resultBox.getChildren().add(carte);
         }
     }
+
 
     public void show() {
         stage.show();
