@@ -23,11 +23,11 @@ public class ProfilPage {
         VBox root = new VBox(10);
         root.setPadding(new Insets(20));
 
-        // Champs non modifiables (Label au lieu de TextField)
+ 
         Label nomLabel = new Label("Nom : " + utilisateur.getNom());
         Label prenomLabel = new Label("Prénom : " + utilisateur.getPrenom());
 
-        // Champs modifiables
+
         TextField emailField = new TextField(utilisateur.getEmail());
         TextField numTelField = new TextField(utilisateur.getNumTel());
 

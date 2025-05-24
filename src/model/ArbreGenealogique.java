@@ -48,7 +48,7 @@ public class ArbreGenealogique {
 
     public Noeud getNoeudParPersonne(Personne personne) {
         for (Noeud n : listeNoeuds) {
-            if (n.getPersonne().getId() == personne.getId()) { // compare par id
+            if (n.getPersonne().getId() == personne.getId()) { 
                 return n;
             }
         }
@@ -80,16 +80,16 @@ public class ArbreGenealogique {
         return parents;
     }
 
-    // Méthode corrigée pour trouver le vrai ancêtre ultime
+   
     public Personne trouverAncetreUltime(Personne personne) {
         Set<Personne> visites = new HashSet<>();
         Personne ancetreMax = personne;
         int profondeurMax = 0;
 
-        // Fonction récursive pour calculer la profondeur maximale
+   
         int profondeur = calculerProfondeurMaximale(personne, visites, 0);
 
-        // Parcourir tous les ancêtres possibles pour trouver celui avec la plus grande profondeur
+  
         visites.clear();
         return trouverAncetreAvecProfondeurMax(personne, visites, 0).personne;
     }
@@ -137,7 +137,7 @@ public class ArbreGenealogique {
         return meilleurAncetre;
     }
 
-    // Classe helper pour le résultat
+
     private static class ResultatAncetre {
         Personne personne;
         int profondeur;
@@ -148,7 +148,7 @@ public class ArbreGenealogique {
         }
     }
 
-    // Méthode corrigée pour construire l'arbre FX (affichage descendants)
+
     private TreeItem<String> construireArbreFXDescendants(Personne personne, Set<Personne> visites) {
         if (visites.contains(personne)) {
             return new TreeItem<>("(cycle avec " + personne.getPrenom() + " " + personne.getNom() + ")");
@@ -164,7 +164,7 @@ public class ArbreGenealogique {
         return item;
     }
 
-    // Nouvelle méthode pour construire l'arbre FX (affichage ancêtres)
+  
     private TreeItem<String> construireArbreFXAncetres(Personne personne, Set<Personne> visites) {
         if (visites.contains(personne)) {
             return new TreeItem<>("(cycle avec " + personne.getPrenom() + " " + personne.getNom() + ")");
@@ -181,7 +181,7 @@ public class ArbreGenealogique {
     }
 
     public void afficherGraphiqueFX() {
-        // Option 1: Afficher depuis l'ancêtre ultime vers les descendants
+    
         afficherGraphiqueFXDescendants();
     }
 
@@ -203,7 +203,7 @@ public class ArbreGenealogique {
     }
 
     public void afficherGraphiqueFXAncetres() {
-        // Option 2: Afficher depuis la racine vers les ancêtres
+  
         Set<Personne> visites = new HashSet<>();
         TreeItem<String> racineItem = construireArbreFXAncetres(racine, visites);
 
@@ -291,7 +291,7 @@ public class ArbreGenealogique {
     
 
     public void afficherArbreGraphiqueCustom() {
-        // Affichage graphique amélioré avec distinction parents/enfants
+   
         afficherArbreGraphiqueCustomDescendants();
     }
 
@@ -299,13 +299,13 @@ public class ArbreGenealogique {
         Pane pane = new Pane();
         Personne racineAffichage = trouverAncetreUltime(racine);
 
-        // Placement de la racine en haut
+
         Label rootLabel = creerLabelAvecCouleur(racineAffichage);
         rootLabel.setLayoutX(250);
         rootLabel.setLayoutY(50);
         pane.getChildren().add(rootLabel);
 
-        // Affichage des enfants en dessous
+    
         List<Personne> enfants = getEnfants(racineAffichage);
         if (!enfants.isEmpty()) {
             int startX = Math.max(50, 250 - (enfants.size() * 75));
@@ -323,7 +323,7 @@ public class ArbreGenealogique {
 
                 pane.getChildren().addAll(line, enfantLabel);
 
-                // Récursivement afficher les petits-enfants
+        
                 Set<Personne> chemin = new HashSet<>();
                 chemin.add(enfant);
                 afficherNiveauSuivant(pane, enfant, enfantLabel, 250, 2, chemin);
@@ -351,13 +351,13 @@ public class ArbreGenealogique {
     public void afficherArbreGraphiqueCustomAncetres() {
         Pane pane = new Pane();
 
-        // Placement de la racine en bas
+     
         Label rootLabel = creerLabelAvecCouleur(racine);
         rootLabel.setLayoutX(250);
         rootLabel.setLayoutY(350);
         pane.getChildren().add(rootLabel);
 
-        // Affichage des parents au-dessus
+     
         List<Personne> parents = getParents(racine);
         if (!parents.isEmpty()) {
             int startX = Math.max(50, 250 - (parents.size() * 75));
@@ -375,7 +375,7 @@ public class ArbreGenealogique {
 
                 pane.getChildren().addAll(line, parentLabel);
 
-                // Récursivement afficher les grands-parents
+          
                 afficherNiveauPrecedent(pane, parent, parentLabel, 150, 2);
             }
         }
@@ -395,7 +395,7 @@ public class ArbreGenealogique {
     }
 
     private void afficherNiveauSuivant(Pane pane, Personne personne, Label labelParent, int yPos, int niveau, Set<Personne> cheminLocal) {
-        if (niveau > 6) return; // Limiter la profondeur si besoin
+        if (niveau > 6) return; 
 
         List<Personne> enfants = getEnfants(personne);
         if (enfants.isEmpty()) return;
@@ -405,7 +405,7 @@ public class ArbreGenealogique {
         for (int i = 0; i < enfants.size(); i++) {
             Personne enfant = enfants.get(i);
 
-            // Évite les cycles directs dans une même branche
+     
             if (cheminLocal.contains(enfant)) continue;
 
             Label enfantLabel = creerLabelAvecCouleur(enfant);
@@ -433,7 +433,7 @@ public class ArbreGenealogique {
     	scroll.setFitToWidth(true);
     	scroll.setFitToHeight(true);
 
-        // Centre au milieu de l'écran
+
         Label centreLabel = creerLabelAvecCouleur(centre);
         int centreX = 400;
         int centreY = 300;
@@ -441,7 +441,7 @@ public class ArbreGenealogique {
         centreLabel.setLayoutY(centreY);
         pane.getChildren().add(centreLabel);
 
-        // Afficher les parents au-dessus
+
         List<Personne> parents = getParents(centre);
         if (!parents.isEmpty()) {
             int startX = centreX - (parents.size() * 75);
@@ -465,7 +465,7 @@ public class ArbreGenealogique {
             }
         }
 
-        // Afficher les enfants en dessous
+ 
         List<Personne> enfants = getEnfants(centre);
         if (!enfants.isEmpty()) {
             int startX = centreX - (enfants.size() * 75);
@@ -505,7 +505,7 @@ public class ArbreGenealogique {
     }
 
     private void afficherNiveauPrecedent(Pane pane, Personne personne, Label labelEnfant, int yPos, int niveau) {
-        if (niveau > 4 || yPos < 50) return; // Limiter la profondeur et éviter de sortir de l'écran
+        if (niveau > 4 || yPos < 50) return;
 
         List<Personne> parents = getParents(personne);
         if (parents.isEmpty()) return;
@@ -525,7 +525,6 @@ public class ArbreGenealogique {
 
             pane.getChildren().addAll(line, parentLabel);
 
-            // Récursion pour le niveau précédent
             afficherNiveauPrecedent(pane, parent, parentLabel, yPos - 100, niveau + 1);
         }
     }
@@ -563,7 +562,6 @@ public class ArbreGenealogique {
             Button btnAjouterPersonne = new Button("Ajouter parent/enfant");
             Button btnFermer = new Button("Fermer");
 
-            // ✅ Action de modification
             btnModifier.setOnAction(ev -> {
                 personne.setNom(nomField.getText());
                 personne.setPrenom(prenomField.getText());
@@ -571,7 +569,7 @@ public class ArbreGenealogique {
                 personne.setNationalite(nationaliteCombo.getValue());
 
                 try {
-                    dao.PersonneDAO.mettreAJour(personne); // 🔁 crée cette méthode si elle n’existe pas
+                    dao.PersonneDAO.mettreAJour(personne);
                     popup.close();
                     Alert alert = new Alert(Alert.AlertType.INFORMATION, "✅ Modifications enregistrées !");
                     alert.show();
@@ -581,13 +579,12 @@ public class ArbreGenealogique {
                 }
             });
 
-            // ❌ Suppression
             btnSupprimer.setOnAction(ev -> {
                 Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer cette personne ?", ButtonType.YES, ButtonType.NO);
                 confirm.showAndWait().ifPresent(type -> {
                     if (type == ButtonType.YES) {
                         try {
-                            dao.PersonneDAO.supprimer(personne); // 🔁 crée cette méthode aussi
+                            dao.PersonneDAO.supprimer(personne);
                             popup.close();
                             Alert alert = new Alert(Alert.AlertType.INFORMATION, "❌ Personne supprimée.");
                             alert.show();

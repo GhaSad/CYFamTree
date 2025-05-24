@@ -76,10 +76,9 @@ public class AjoutPersonnePage {
             TypeLien lien = lienParenteCombo.getValue();
             Nationalite nationalite = utilisateur.getNationalite();
 
-            System.out.println(">>> [DEBUG] Clic sur valider : nom = " + nom + ", prenom = " + prenom + ", date = " + dateNaissance + ", lien = " + lien);
 
             if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || lien == null) {
-                System.out.println(">>> [DEBUG] Champs incomplets, annulation");
+
                 new Alert(Alert.AlertType.WARNING, "Tous les champs doivent être remplis.").show();
                 return;
             }
@@ -95,13 +94,11 @@ public class AjoutPersonnePage {
             }
 
             try (Connection conn = Database.getConnection()) {
-                System.out.println(">>> [DEBUG] Connexion DB ouverte");
                 int idPersonne = PersonneDAO.sauvegarder(nouvellePersonne);
                 nouvellePersonne.setId(idPersonne);
-                System.out.println(">>> [DEBUG] Personne sauvegardée avec ID : " + idPersonne);
+
 
                 try {
-                    System.out.println(">>> [DEBUG] Tentative de création de lien logique : " + lien);
                     switch (lien) {
                     case FILS, FILLE -> source.getPersonne().creerLien(nouvellePersonne, lien);  // source est le parent
                     case PERE, MERE -> nouvellePersonne.creerLien(source.getPersonne(), lien);   // nouvellePersonne est le parent
@@ -109,32 +106,18 @@ public class AjoutPersonnePage {
                 }
                     
                 } catch (IllegalArgumentException ex) {
-                    System.out.println(">>> [DEBUG] Erreur lors de la création du lien : " + ex.getMessage());
                     new Alert(Alert.AlertType.ERROR, ex.getMessage()).show();
                     return;
                 }
 
-                System.out.println("===== DEBUG LIENS =====");
-                System.out.println("Liens de " + source.getPersonne().getPrenom() + " " + source.getPersonne().getNom() + " :");
-                for (Lien l : source.getPersonne().getLiens()) {
-                    System.out.println("- " + l.getTypeLien() + " : " + l.getPersonneLiee().getPrenom() + " " + l.getPersonneLiee().getNom());
-                }
-                System.out.println("Liens de " + nouvellePersonne.getPrenom() + " " + nouvellePersonne.getNom() + " :");
-                for (Lien l : nouvellePersonne.getLiens()) {
-                    System.out.println("- " + l.getTypeLien() + " : " + l.getPersonneLiee().getPrenom() + " " + l.getPersonneLiee().getNom());
-                }
-                System.out.println("========================");
-
                 Noeud nouveauNoeud = new Noeud(nouvellePersonne);
                 NoeudDAO noeudDAO = new NoeudDAO(conn);
                 noeudDAO.sauvegarderNoeud(nouveauNoeud, utilisateur.getArbre().getId());
-                System.out.println(">>> [DEBUG] Noeud sauvegardé avec ID : " + nouveauNoeud.getId());
 
                 if (utilisateur.getArbre().getNoeudParPersonne(nouvellePersonne) == null) {
                     utilisateur.getArbre().ajouterNoeud(nouveauNoeud);
                 }
                 utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
-                System.out.println(">>> [DEBUG] Noeud ajouté dans l’arbre mémoire");
 
                 String sql = "INSERT INTO noeud_lien (id_parent, id_enfant, arbre_id) VALUES (?, ?, ?)";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -147,7 +130,6 @@ public class AjoutPersonnePage {
                     }
                     stmt.setInt(3, utilisateur.getArbre().getId());
                     stmt.executeUpdate();
-                    System.out.println(">>> [DEBUG] Lien noeud_lien sauvegardé en base");
                 }
 
                 new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();

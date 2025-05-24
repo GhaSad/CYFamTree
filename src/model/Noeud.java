@@ -12,7 +12,7 @@ public class Noeud {
     public Noeud(int id,Personne personne, Visibilite visibilite) {
         this.id = id;
         this.personne = personne;
-        this.visibilite = visibilite != null ? visibilite : Visibilite.PRIVATE; // valeur par défaut
+        this.visibilite = visibilite != null ? visibilite : Visibilite.PRIVATE; 
         this.parents = new ArrayList<>();
         this.enfants = new ArrayList<>();
     }
@@ -36,7 +36,7 @@ public class Noeud {
         if (parent == null) return;
         if (!parents.contains(parent)) {
             parents.add(parent);
-            parent.ajouterEnfant(this); // relation bidirectionnelle
+            parent.ajouterEnfant(this); 
         }
     }
 
@@ -44,7 +44,7 @@ public class Noeud {
         if (enfant == null) return;
         if (!enfants.contains(enfant)) {
             enfants.add(enfant);
-            enfant.ajouterParent(this); // relation bidirectionnelle
+            enfant.ajouterParent(this); 
         }
     }
 
@@ -52,7 +52,7 @@ public class Noeud {
         this.visibilite = v;
     }
 
-    // Getters utiles
+
     public Personne getPersonne() {
         return personne;
     }
@@ -69,10 +69,9 @@ public class Noeud {
         return visibilite;
     }
 
-    // Optionnel : afficher le noeud et ses enfants récursivement
+  
     public void afficher(int niveau) {
-        for (int i = 0; i < niveau; i++) System.out.print("  ");
-        System.out.println(personne.getPrenom() + " " + personne.getNom());
+        for (int i = 0; i < niveau; i++)
         for (Noeud enfant : enfants) {
             enfant.afficher(niveau + 1);
         }

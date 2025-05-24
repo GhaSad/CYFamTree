@@ -26,7 +26,7 @@ public class AccueilPage {
         Label sousTitre = new Label("Créez, explorez et partagez votre arbre généalogique.");
         sousTitre.setStyle("-fx-font-size: 14px; -fx-text-fill: #444;");
 
-        // Boutons
+  
         Button btnInscription = new Button("S'inscrire");
         Button btnConnexion = new Button("Se connecter");
         Button btnAdmin = new Button("Administration");

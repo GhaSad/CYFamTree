@@ -7,6 +7,7 @@ DELETE FROM personne;
 DELETE FROM noeud_lien;
 DELETE FROM noeud;
 DELETE FROM lien;
+DELETE FROM personne_lien;
 
 PRAGMA foreign_keys = ON;
 

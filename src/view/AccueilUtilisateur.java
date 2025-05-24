@@ -13,7 +13,7 @@ import java.sql.Connection;
 
 public class AccueilUtilisateur extends javafx.application.Application {
 
-    private static Utilisateur utilisateurStatic; // stockage temporaire
+    private static Utilisateur utilisateurStatic; 
     private Utilisateur utilisateur;
     private Stage primaryStage;
 
@@ -26,9 +26,8 @@ public class AccueilUtilisateur extends javafx.application.Application {
             throw new IllegalStateException("Aucun utilisateur fourni à AccueilUtilisateur");
         }
 
-        // Chargement complet de l'arbre depuis la base
         ArbreGenealogique arbre = ArbreDAO.chargerArbreParUtilisateur(this.utilisateur);
-        // On retrouve la vraie personne associée à l’utilisateur
+
         Personne vraiePersonne = PersonneDAO.trouverParUtilisateurId(utilisateur.getId());
         this.utilisateur.setArbre(arbre);
 
@@ -60,7 +59,7 @@ public class AccueilUtilisateur extends javafx.application.Application {
                         return;
                     }
 
-                    // ✅ Récupérer la vraie personne associée à l'utilisateur
+             
                     Personne personneRacine = PersonneDAO.trouverParUtilisateurId(utilisateur.getId());
                     if (personneRacine == null) {
                         new Alert(Alert.AlertType.ERROR, "Impossible de retrouver les informations de la personne liée à l'utilisateur.").show();
