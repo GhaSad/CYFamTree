@@ -1,5 +1,6 @@
 package model;
 
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -84,15 +85,48 @@ public class Personne {
     }
 
 
-    public void creerLien(Personne autre, TypeLien type) {
-        
-	    Lien lien = new Lien(this, autre, type);
-	    	if (!lien.estValide()) {
-	    	    throw new IllegalArgumentException("Lien invalide : contrainte non respectée.");
-	    	}
-	    	liens.add(lien);
+    public void creerLien(Personne autre, TypeLien type, boolean genererInverse, boolean validerStrictement) {
+        System.out.println(">>> Création de lien : " + type + " entre " + this.getPrenom() + " (" + this.getDateNaissance() + ") et " + autre.getPrenom() + " (" + autre.getDateNaissance() + ")");
+
+        Lien lien = new Lien(this, autre, type);
+        utils.ValidationResult result = validerStrictement ? lien.estValideAvancee() : new utils.ValidationResult(true, "");
+
+        if (!result.isValide()) {
+            System.out.println(">>> Refusé : " + result.getMessage());
+            throw new IllegalArgumentException("Lien invalide : " + result.getMessage());
+        }
+
+        this.liens.add(lien);
+        System.out.println(">>> Lien ajouté à la personne source (" + this.getPrenom() + ")");
+
+        try (Connection conn = dao.Database.getConnection()) {
+            if (this.getId() > 0 && autre.getId() > 0) {
+                dao.LienDAO.sauvegarder(lien, conn);
+                System.out.println(">>> Lien enregistré dans la base (id_source = " + this.getId() + ", id_cible = " + autre.getId() + ", type = " + type + ")");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (genererInverse) {
+            TypeLien inverse = type.getLienInverse();
+            if (inverse != null && autre.getLiens().stream().noneMatch(l -> l.getPersonneLiee().equals(this) && l.getTypeLien() == inverse)) {
+                try {
+                    System.out.println(">>> Lien inverse tenté : " + autre.getPrenom() + " → " + this.getPrenom() + " (" + inverse + ")");
+                    autre.creerLien(this, inverse, false, false); // ❗ ICI : validerStrictement = false
+                } catch (IllegalArgumentException ex) {
+                    System.out.println(">>> Le lien inverse a échoué : " + ex.getMessage());
+                }
+            }
+        }
     }
 
+
+    
+    public void creerLien(Personne autre, TypeLien type) {
+        this.creerLien(autre, type, true, true);
+    }
+    
     public List<Lien> getLiens() {
         return liens;
     }

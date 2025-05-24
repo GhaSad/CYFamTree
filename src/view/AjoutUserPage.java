@@ -68,8 +68,10 @@ public class AjoutUserPage {
             }
 
             Lien lien = new Lien(utilisateurCourant, cible, typeLien);
-            if (!lien.estValide()) {
-                new Alert(Alert.AlertType.ERROR, "Le lien proposé n'est pas valide.").show();
+            utils.ValidationResult result = lien.estValideAvancee();
+
+            if (!result.isValide()) {
+                new Alert(Alert.AlertType.ERROR, result.getMessage()).show();
                 return;
             }
 

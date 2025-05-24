@@ -108,9 +108,11 @@ public class AccueilUtilisateur extends javafx.application.Application {
             Label arbreInfo = new Label("🌳 Vous avez déjà un arbre généalogique.");
             arbreInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #228B22;");
 
-            Button btnConsulterArbre = new Button("Consulter mon arbre");
-            btnConsulterArbre.setOnAction(e -> {utilisateur.getArbre().afficherArbreGraphiqueCustom();
-                utilisateur.getArbre().afficherTexte();});
+            Button btnConsulterArbre = new Button("Consulter mon arbre complet");
+            btnConsulterArbre.setOnAction(e -> {
+                utilisateur.getArbre().afficherArbreGraphiqueCustomComplet(utilisateur);
+                utilisateur.getArbre().afficherArbreCompletDepuisToutesRacines();; // Optionnel : garde si tu veux aussi l'affichage console
+            });
 
             arbreBox.getChildren().addAll(arbreInfo, btnConsulterArbre);
         }

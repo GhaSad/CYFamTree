@@ -29,6 +29,8 @@ public class Noeud {
     public void setId(int id) {
         this.id = id;
     }
+    
+    
 
     public void ajouterParent(Noeud parent) {
         if (parent == null) return;

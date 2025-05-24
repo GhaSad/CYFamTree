@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import view.AjoutPersonnePage;
 
 public class ArbreGenealogique {
     private Utilisateur utilisateur;
@@ -264,6 +265,30 @@ public class ArbreGenealogique {
     private void printIndent(int niveau) {
         for (int i = 0; i < niveau; i++) System.out.print("  ");
     }
+    public void afficherArbreCompletDepuisToutesRacines() {
+        Set<Personne> visites = new HashSet<>();
+        System.out.println("=== Arbre généalogique complet ===");
+
+        for (Noeud noeud : listeNoeuds) {
+            Personne personne = noeud.getPersonne();
+            if (getParents(personne).isEmpty() && !visites.contains(personne)) {
+                afficherDescendants(personne, 0, visites);
+            }
+        }
+    }
+
+    private void afficherDescendants(Personne personne, int niveau, Set<Personne> visites) {
+        if (!visites.add(personne)) return;
+
+        printIndent(niveau);
+        System.out.println(personne.getPrenom() + " " + personne.getNom());
+
+        for (Personne enfant : getEnfants(personne)) {
+            afficherDescendants(enfant, niveau + 1, visites);
+        }
+    }
+
+    
 
     public void afficherArbreGraphiqueCustom() {
         // Affichage graphique amélioré avec distinction parents/enfants
@@ -287,9 +312,9 @@ public class ArbreGenealogique {
 
             for (int i = 0; i < enfants.size(); i++) {
                 Personne enfant = enfants.get(i);
-                Label enfantLabel = creerLabelAvecCouleur(enfant);
-                enfantLabel.setLayoutX(startX + i * 150);
-                enfantLabel.setLayoutY(150);
+                	Label enfantLabel = creerLabelAvecCouleur(enfant);
+                	enfantLabel.setLayoutX(startX + i * 150);
+                	enfantLabel.setLayoutY(150);
 
                 Line line = new Line(
                         rootLabel.getLayoutX() + 30, rootLabel.getLayoutY() + 20,
@@ -299,14 +324,20 @@ public class ArbreGenealogique {
                 pane.getChildren().addAll(line, enfantLabel);
 
                 // Récursivement afficher les petits-enfants
-                afficherNiveauSuivant(pane, enfant, enfantLabel, 250, 2);
+                Set<Personne> chemin = new HashSet<>();
+                chemin.add(enfant);
+                afficherNiveauSuivant(pane, enfant, enfantLabel, 250, 2, chemin);
+
             }
         }
 
         Button btnFermer = new Button("Fermer");
         btnFermer.setOnAction(event -> ((Stage) btnFermer.getScene().getWindow()).close());
 
-        VBox layout = new VBox(15, pane, btnFermer);
+        ScrollPane scrollPane = new ScrollPane(pane);
+        scrollPane.setFitToWidth(true);
+
+        VBox layout = new VBox(15, scrollPane, btnFermer);
         layout.setPadding(new Insets(15));
         layout.setAlignment(Pos.TOP_CENTER);
 
@@ -363,30 +394,114 @@ public class ArbreGenealogique {
         stage.show();
     }
 
-    private void afficherNiveauSuivant(Pane pane, Personne personne, Label labelParent, int yPos, int niveau) {
-        if (niveau > 4) return; // Limiter la profondeur pour éviter l'overflow
+    private void afficherNiveauSuivant(Pane pane, Personne personne, Label labelParent, int yPos, int niveau, Set<Personne> cheminLocal) {
+        if (niveau > 6) return; // Limiter la profondeur si besoin
 
         List<Personne> enfants = getEnfants(personne);
         if (enfants.isEmpty()) return;
 
-        int startX = Math.max(50, (int)labelParent.getLayoutX() - (enfants.size() * 75));
+        int startX = Math.max(50, (int) labelParent.getLayoutX() - (enfants.size() * 75));
 
         for (int i = 0; i < enfants.size(); i++) {
             Personne enfant = enfants.get(i);
+
+            // Évite les cycles directs dans une même branche
+            if (cheminLocal.contains(enfant)) continue;
+
             Label enfantLabel = creerLabelAvecCouleur(enfant);
             enfantLabel.setLayoutX(startX + i * 150);
             enfantLabel.setLayoutY(yPos);
 
             Line line = new Line(
-                    labelParent.getLayoutX() + 30, labelParent.getLayoutY() + 20,
-                    enfantLabel.getLayoutX() + 30, enfantLabel.getLayoutY()
+                labelParent.getLayoutX() + 30, labelParent.getLayoutY() + 20,
+                enfantLabel.getLayoutX() + 30, enfantLabel.getLayoutY()
             );
 
             pane.getChildren().addAll(line, enfantLabel);
 
-            // Récursion pour le niveau suivant
-            afficherNiveauSuivant(pane, enfant, enfantLabel, yPos + 100, niveau + 1);
+            Set<Personne> nouveauChemin = new HashSet<>(cheminLocal);
+            nouveauChemin.add(enfant);
+            afficherNiveauSuivant(pane, enfant, enfantLabel, yPos + 100, niveau + 1, nouveauChemin);
         }
+    }
+
+    
+    public void afficherArbreGraphiqueCustomComplet(Personne centre) {
+    	Pane pane = new Pane();
+    	ScrollPane scroll = new ScrollPane(pane);
+    	
+    	scroll.setFitToWidth(true);
+    	scroll.setFitToHeight(true);
+
+        // Centre au milieu de l'écran
+        Label centreLabel = creerLabelAvecCouleur(centre);
+        int centreX = 400;
+        int centreY = 300;
+        centreLabel.setLayoutX(centreX);
+        centreLabel.setLayoutY(centreY);
+        pane.getChildren().add(centreLabel);
+
+        // Afficher les parents au-dessus
+        List<Personne> parents = getParents(centre);
+        if (!parents.isEmpty()) {
+            int startX = centreX - (parents.size() * 75);
+            for (int i = 0; i < parents.size(); i++) {
+                Personne parent = parents.get(i);
+                Label parentLabel = creerLabelAvecCouleur(parent);
+                parentLabel.setLayoutX(startX + i * 150);
+                parentLabel.setLayoutY(centreY - 100);
+
+                Line line = new Line(
+                    parentLabel.getLayoutX() + 30, parentLabel.getLayoutY() + 40,
+                    centreLabel.getLayoutX() + 30, centreLabel.getLayoutY()
+                );
+
+                pane.getChildren().addAll(line, parentLabel);
+
+                Set<Personne> cheminParent = new HashSet<>();
+                cheminParent.add(parent);
+                int yParent = (int) parentLabel.getLayoutY() - 100;
+                afficherNiveauPrecedent(pane, parent, parentLabel, yParent, 2);
+            }
+        }
+
+        // Afficher les enfants en dessous
+        List<Personne> enfants = getEnfants(centre);
+        if (!enfants.isEmpty()) {
+            int startX = centreX - (enfants.size() * 75);
+            for (int i = 0; i < enfants.size(); i++) {
+                Personne enfant = enfants.get(i);
+                Label enfantLabel = creerLabelAvecCouleur(enfant);
+                enfantLabel.setLayoutX(startX + i * 150);
+                enfantLabel.setLayoutY(centreY + 100);
+
+                Line line = new Line(
+                    centreLabel.getLayoutX() + 30, centreLabel.getLayoutY() + 40,
+                    enfantLabel.getLayoutX() + 30, enfantLabel.getLayoutY()
+                );
+
+                pane.getChildren().addAll(line, enfantLabel);
+
+                Set<Personne> chemin = new HashSet<>();
+                chemin.add(enfant);
+                int ySuivant = (int) enfantLabel.getLayoutY() + 100;
+                afficherNiveauSuivant(pane, enfant, enfantLabel, ySuivant, 2, chemin);
+            }
+        }
+
+        Button btnFermer = new Button("Fermer");
+        btnFermer.setOnAction(e -> ((Stage) btnFermer.getScene().getWindow()).close());
+
+
+        VBox layout = new VBox(15, scroll, btnFermer);
+        layout.setPadding(new Insets(15));
+        layout.setAlignment(Pos.TOP_CENTER);
+
+        Scene scene = new Scene(layout, 1000, 800);
+        Stage stage = new Stage();
+        stage.setTitle("Arbre Généalogique - Vue complète");
+        stage.setScene(scene);
+        stage.show();
     }
 
     private void afficherNiveauPrecedent(Pane pane, Personne personne, Label labelEnfant, int yPos, int niveau) {
@@ -445,6 +560,7 @@ public class ArbreGenealogique {
 
             Button btnModifier = new Button("Modifier");
             Button btnSupprimer = new Button("Supprimer");
+            Button btnAjouterPersonne = new Button("Ajouter parent/enfant");
             Button btnFermer = new Button("Fermer");
 
             // ✅ Action de modification
@@ -482,13 +598,20 @@ public class ArbreGenealogique {
                     }
                 });
             });
+            btnAjouterPersonne.setOnAction(ev -> {
+                AjoutPersonnePage page = new AjoutPersonnePage(utilisateur, personne);
+                page.show();
+            });
+            
 
             content.getChildren().addAll(
                     new Label("Nom :"), nomField,
                     new Label("Prénom :"), prenomField,
                     new Label("Date de naissance :"), dateNaissancePicker,
                     new Label("Nationalité :"), nationaliteCombo,
-                    new HBox(10, btnModifier, btnSupprimer, btnFermer)
+                    new HBox(10, btnModifier, btnSupprimer, btnFermer),
+                    new Label("Ajouter un parent ou un enfant :"),
+                    btnAjouterPersonne
             );
 
             btnFermer.setOnAction(ev -> popup.close());

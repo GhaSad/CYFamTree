@@ -26,6 +26,16 @@ public enum TypeLien {
     public String getLibelle() {
         return libelle;
     }
+    public TypeLien getLienInverse() {
+        return switch (this) {
+            case PERE, MERE -> TypeLien.FILS;  
+            case FILS -> TypeLien.PERE;        
+            case FILLE -> TypeLien.PERE;       
+            default -> null;
+        };
+    }
+
+
 
     public Boolean estValide(){
         //Conditions à implémenter

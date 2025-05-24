@@ -20,9 +20,14 @@ import java.time.Period;
 public class AjoutPersonnePage {
 
     private Utilisateur utilisateur;
+    private Personne sourcePersonne;
 
-    public AjoutPersonnePage(Utilisateur utilisateur) {
+    public AjoutPersonnePage(Utilisateur utilisateur, Personne sourcePersonne) {
         this.utilisateur = utilisateur;
+        this.sourcePersonne = sourcePersonne;
+    }
+    public AjoutPersonnePage(Utilisateur utilisateur) {
+    	this(utilisateur, utilisateur);
     }
 
     public void show() {
@@ -42,7 +47,12 @@ public class AjoutPersonnePage {
         DatePicker dateNaissancePicker = new DatePicker();
 
         ComboBox<TypeLien> lienParenteCombo = new ComboBox<>();
-        lienParenteCombo.getItems().addAll(TypeLien.values());
+        lienParenteCombo.getItems().addAll(
+        	    TypeLien.PERE,
+        	    TypeLien.MERE,
+        	    TypeLien.FILS,
+        	    TypeLien.FILLE
+        	);
         lienParenteCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(TypeLien typeLien) {
@@ -66,7 +76,10 @@ public class AjoutPersonnePage {
             TypeLien lien = lienParenteCombo.getValue();
             Nationalite nationalite = utilisateur.getNationalite();
 
+            System.out.println(">>> [DEBUG] Clic sur valider : nom = " + nom + ", prenom = " + prenom + ", date = " + dateNaissance + ", lien = " + lien);
+
             if (nom.isEmpty() || prenom.isEmpty() || dateNaissance == null || lien == null) {
+                System.out.println(">>> [DEBUG] Champs incomplets, annulation");
                 new Alert(Alert.AlertType.WARNING, "Tous les champs doivent être remplis.").show();
                 return;
             }
@@ -74,63 +87,78 @@ public class AjoutPersonnePage {
             int age = Period.between(dateNaissance, LocalDate.now()).getYears();
             Personne nouvellePersonne = new Personne(nom, prenom, dateNaissance, nationalite, age);
 
+            Noeud source = utilisateur.getArbre().getNoeudParPersonne(sourcePersonne);
+            if (source == null) {
+                Noeud nouveauSource = new Noeud(sourcePersonne);
+                utilisateur.getArbre().ajouterNoeud(nouveauSource);
+                source = nouveauSource;
+            }
+
             try (Connection conn = Database.getConnection()) {
+                System.out.println(">>> [DEBUG] Connexion DB ouverte");
                 int idPersonne = PersonneDAO.sauvegarder(nouvellePersonne);
                 nouvellePersonne.setId(idPersonne);
-                System.out.println("🧠 Nouvelle personne enregistrée avec ID : " + idPersonne);
+                System.out.println(">>> [DEBUG] Personne sauvegardée avec ID : " + idPersonne);
 
-                System.out.println("🧠 Création noeud avec id_personne = " + nouvellePersonne.getId());
+                try {
+                    System.out.println(">>> [DEBUG] Tentative de création de lien logique : " + lien);
+                    switch (lien) {
+                    case FILS, FILLE -> source.getPersonne().creerLien(nouvellePersonne, lien);  // source est le parent
+                    case PERE, MERE -> nouvellePersonne.creerLien(source.getPersonne(), lien);   // nouvellePersonne est le parent
+                    default -> throw new IllegalArgumentException("Type de lien non supporté.");
+                }
+                    
+                } catch (IllegalArgumentException ex) {
+                    System.out.println(">>> [DEBUG] Erreur lors de la création du lien : " + ex.getMessage());
+                    new Alert(Alert.AlertType.ERROR, ex.getMessage()).show();
+                    return;
+                }
+
+                System.out.println("===== DEBUG LIENS =====");
+                System.out.println("Liens de " + source.getPersonne().getPrenom() + " " + source.getPersonne().getNom() + " :");
+                for (Lien l : source.getPersonne().getLiens()) {
+                    System.out.println("- " + l.getTypeLien() + " : " + l.getPersonneLiee().getPrenom() + " " + l.getPersonneLiee().getNom());
+                }
+                System.out.println("Liens de " + nouvellePersonne.getPrenom() + " " + nouvellePersonne.getNom() + " :");
+                for (Lien l : nouvellePersonne.getLiens()) {
+                    System.out.println("- " + l.getTypeLien() + " : " + l.getPersonneLiee().getPrenom() + " " + l.getPersonneLiee().getNom());
+                }
+                System.out.println("========================");
+
                 Noeud nouveauNoeud = new Noeud(nouvellePersonne);
                 NoeudDAO noeudDAO = new NoeudDAO(conn);
                 noeudDAO.sauvegarderNoeud(nouveauNoeud, utilisateur.getArbre().getId());
-                System.out.println("✅ Noeud enregistré avec ID : " + nouveauNoeud.getId());
+                System.out.println(">>> [DEBUG] Noeud sauvegardé avec ID : " + nouveauNoeud.getId());
 
-                // Ajout logique dans l’arbre en mémoire
+                if (utilisateur.getArbre().getNoeudParPersonne(nouvellePersonne) == null) {
+                    utilisateur.getArbre().ajouterNoeud(nouveauNoeud);
+                }
                 utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
-                utilisateur.getArbre().ajouterNoeud(nouveauNoeud);
+                System.out.println(">>> [DEBUG] Noeud ajouté dans l’arbre mémoire");
 
-
-                // 🔁 Enregistrement du lien dans noeud_lien (arbre_id + id_parent + id_enfant)
-                Personne vraiePersonne = PersonneDAO.trouverParUtilisateurId(utilisateur.getId());
-                Noeud source = utilisateur.getArbre().getNoeudParPersonne(vraiePersonne);
-                if (source != null) {
-                    String sql = "INSERT INTO noeud_lien (id_parent, id_enfant, arbre_id) VALUES (?, ?, ?)";
-                    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                        if (lien == TypeLien.FILS || lien == TypeLien.FILLE) {
-                            // Utilisateur est parent
-                            stmt.setInt(1, source.getId());
-                            stmt.setInt(2, nouveauNoeud.getId());
-                        } else if (lien == TypeLien.PERE || lien == TypeLien.MERE) {
-                            // Utilisateur est enfant
-                            stmt.setInt(1, nouveauNoeud.getId());
-                            stmt.setInt(2, source.getId());
-                        } else {
-                            // Autres types (frère/soeur...) — relation non hiérarchique → on ne stocke pas pour l'instant
-                            stmt.close();
-                            new Alert(Alert.AlertType.INFORMATION, "Lien de type " + lien.getLibelle() + " enregistré uniquement en mémoire.").show();
-                            stage.close();
-                            return;
-                        }
-                        stmt.setInt(3, utilisateur.getArbre().getId());
-                        stmt.executeUpdate();
+                String sql = "INSERT INTO noeud_lien (id_parent, id_enfant, arbre_id) VALUES (?, ?, ?)";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    if (lien == TypeLien.FILS || lien == TypeLien.FILLE) {
+                        stmt.setInt(1, source.getId());
+                        stmt.setInt(2, nouveauNoeud.getId());
+                    } else if (lien == TypeLien.PERE || lien == TypeLien.MERE) {
+                        stmt.setInt(1, nouveauNoeud.getId());
+                        stmt.setInt(2, source.getId());
                     }
-                } else {
-                    System.out.println("❌ Erreur : Noeud racine (source) non trouvé.");
+                    stmt.setInt(3, utilisateur.getArbre().getId());
+                    stmt.executeUpdate();
+                    System.out.println(">>> [DEBUG] Lien noeud_lien sauvegardé en base");
                 }
 
                 new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
-
-             // 🔄 Rechargement de l’arbre pour qu’il soit à jour en mémoire
-             utilisateur.setArbre(dao.ArbreDAO.chargerArbreParUtilisateur(utilisateur));
-
-             stage.close();
+                utilisateur.setArbre(dao.ArbreDAO.chargerArbreParUtilisateur(utilisateur));
+                stage.close();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
                 new Alert(Alert.AlertType.ERROR, "Erreur lors de la sauvegarde en base.").show();
             }
         });
-
 
         root.getChildren().addAll(
                 new Label("Nom :"), nomField,
