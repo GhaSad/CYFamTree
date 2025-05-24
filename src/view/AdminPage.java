@@ -15,6 +15,7 @@ import model.Utilisateur;
 import java.io.File;
 import java.util.List;
 
+/** Interface d'administration pour la validation ou la suppression des utilisateurs. */
 public class AdminPage {
 
     private Stage stage;

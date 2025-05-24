@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
 
+/** Interface d'affichage de l'historique des consultations de l'arbre de l'utilisateur. */
 public class HistoriqueConsultationPage {
 
     private Utilisateur utilisateur;

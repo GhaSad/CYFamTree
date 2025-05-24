@@ -17,6 +17,7 @@ import model.Utilisateur;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/** Interface de recherche de personnes ou d'utilisateurs selon plusieurs critères. */
 public class RecherchePage {
 
     private Stage stage;

@@ -13,6 +13,7 @@ import dao.UtilisateurDAO;
 import java.io.File;
 import java.io.FileInputStream;
 
+/** Interface de gestion du profil utilisateur (édition des infos personnelles). */
 public class ProfilPage {
 
     private Utilisateur utilisateur;

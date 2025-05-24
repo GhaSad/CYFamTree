@@ -14,12 +14,24 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import view.AjoutPersonnePage;
 
+/**
+ * La classe {@code ArbreGenealogique} représente la structure d’un arbre généalogique lié à un utilisateur.
+ * Elle permet d’ajouter, organiser, afficher et gérer les liens entre personnes (parents, enfants) via des nœuds.
+ * Elle gère à la fois les affichages textuels et graphiques de l'arbre à l’aide de JavaFX.
+ */
 public class ArbreGenealogique {
     private Utilisateur utilisateur;
     private Personne racine;
     private List<Noeud> listeNoeuds;
     private int id;
 
+
+    /**
+     * Construit un nouvel arbre généalogique pour un utilisateur donné.
+     *
+     * @param utilisateur l’utilisateur propriétaire de l’arbre
+     * @param racine la personne racine de l’arbre
+     */
     public ArbreGenealogique(Utilisateur utilisateur, Personne racine) {
         this.utilisateur = utilisateur;
         this.racine = racine;
@@ -59,7 +71,9 @@ public class ArbreGenealogique {
         return trouverAncetreUltime(racine);
     }
 
-
+    /**
+     * Retourne les enfants directs d’une personne.
+     */
     public List<Personne> getEnfants(Personne p) {
         Noeud noeud = getNoeudParPersonne(p);
         if (noeud == null) return new ArrayList<>();
@@ -69,7 +83,9 @@ public class ArbreGenealogique {
         }
         return enfants;
     }
-
+    /**
+     * Retourne les parents directs d’une personne.
+     */
     public List<Personne> getParents(Personne p) {
         Noeud noeud = getNoeudParPersonne(p);
         if (noeud == null) return new ArrayList<>();
@@ -80,7 +96,9 @@ public class ArbreGenealogique {
         return parents;
     }
 
-   
+    /**
+     * Recherche récursivement l’ancêtre ultime à partir d’une personne.
+     */
     public Personne trouverAncetreUltime(Personne personne) {
         Set<Personne> visites = new HashSet<>();
         Personne ancetreMax = personne;
@@ -137,7 +155,9 @@ public class ArbreGenealogique {
         return meilleurAncetre;
     }
 
-
+    /**
+     * Classe utilitaire interne pour stocker le résultat d'une recherche d'ancêtre.
+     */
     private static class ResultatAncetre {
         Personne personne;
         int profondeur;
@@ -181,7 +201,7 @@ public class ArbreGenealogique {
     }
 
     public void afficherGraphiqueFX() {
-    
+
         afficherGraphiqueFXDescendants();
     }
 
@@ -203,7 +223,7 @@ public class ArbreGenealogique {
     }
 
     public void afficherGraphiqueFXAncetres() {
-  
+
         Set<Personne> visites = new HashSet<>();
         TreeItem<String> racineItem = construireArbreFXAncetres(racine, visites);
 

@@ -10,8 +10,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO pour la gestion des ressources partagées dans la base de données.
+ */
 public class RessourceDAO {
 
+    /**
+     * Sauvegarde une ressource partagée dans la base de données avec un destinataire.
+     *
+     * @param ressource        L'objet RessourcePartagee à enregistrer.
+     * @param idDestinataire   L'identifiant de l'utilisateur destinataire.
+     * @throws SQLException En cas d'erreur SQL.
+     */
     public static void sauvegarder(RessourcePartagee ressource, int idDestinataire) throws SQLException {
         String sql = "INSERT INTO ressource_partagee (type_ressource, fichier, date, id_auteur, id_destinataire) VALUES (?, ?, ?, ?, ?)";
 
@@ -28,6 +38,13 @@ public class RessourceDAO {
         }
     }
 
+    /**
+     * Récupère toutes les ressources partagées reçues par un utilisateur.
+     *
+     * @param idUtilisateur L'identifiant du destinataire.
+     * @return Liste des ressources partagées reçues par l'utilisateur.
+     * @throws SQLException En cas d'erreur SQL.
+     */
     public static List<RessourcePartagee> getRessourcesPour(int idUtilisateur) throws SQLException {
         List<RessourcePartagee> ressources = new ArrayList<>();
 
@@ -44,7 +61,7 @@ public class RessourceDAO {
                         TypeRessource.valueOf(rs.getString("type_ressource")),
                         rs.getString("fichier"),
                         UtilisateurDAO.trouverParId(rs.getInt("id_auteur")),
-                        List.of(UtilisateurDAO.trouverParId(idUtilisateur)) // destinataire unique ici
+                        List.of(UtilisateurDAO.trouverParId(idUtilisateur)) // destinataire unique
                 );
 
                 r.setIdRessource(rs.getInt("id_ressource"));

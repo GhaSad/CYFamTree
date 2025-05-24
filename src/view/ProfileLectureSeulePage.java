@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Utilisateur;
 
+/** Interface de consultation d'un profil utilisateur en lecture seule. */
 public class ProfileLectureSeulePage {
 
     private final Utilisateur utilisateur;

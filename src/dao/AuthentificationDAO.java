@@ -1,17 +1,23 @@
 package dao;
+
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import model.Consultation;
-//import dao.ConsultationDAO;
-import org.mindrot.jbcrypt.BCrypt;  // <-- N'oublie pas cet import !
 
+/**
+ * DAO responsable de l'authentification et de l'enregistrement des utilisateurs.
+ */
 public class AuthentificationDAO {
 
-    // Vérifier les identifiants de l'utilisateur
+    /**
+     * Vérifie les identifiants fournis (login et mot de passe) pour authentifier un utilisateur.
+     *
+     * @param login    Identifiant (code privé) de l'utilisateur.
+     * @param mdpClair Mot de passe saisi par l'utilisateur.
+     * @return L'objet {@link Utilisateur} si l'identification est correcte, sinon {@code null}.
+     */
     public Utilisateur authentifier(String login, String mdpClair) {
         String sql = "SELECT * FROM utilisateur WHERE login = ?";
         try (Connection conn = Database.getConnection();
@@ -46,10 +52,6 @@ public class AuthentificationDAO {
                     user.setId(rs.getInt("id"));
                     user.setDoitChangerMotDePasse(rs.getInt("doit_changer_mdp") == 1);
 
-                    // Enregistrement de consultation
-                    //Consultation consultation = new Consultation(user);
-                    //ConsultationDAO.enregistrerConsultation(consultation);
-
                     return user;
                 }
             }
@@ -61,7 +63,13 @@ public class AuthentificationDAO {
         return null;
     }
 
-
+    /**
+     * Enregistre un nouvel utilisateur ainsi que son équivalent dans la table {@code personne}.
+     *
+     * @param utilisateur      Utilisateur à sauvegarder.
+     * @param login            Identifiant (code privé) généré.
+     * @param motDePasseClair Mot de passe initial (non utilisé ici, généré automatiquement via le prénom).
+     */
     public void save(Utilisateur utilisateur, String login, String motDePasseClair) {
         if (userExists(login)) {
             System.out.println("Erreur : L'utilisateur avec le login '" + login + "' existe déjà.");
@@ -70,11 +78,10 @@ public class AuthentificationDAO {
 
         try (Connection conn = Database.getConnection()) {
 
-            // 1. Insertion dans la table utilisateur
             String sqlUtilisateur = "INSERT INTO utilisateur(" +
                     "login, mot_de_passe, nom, prenom, date_naissance, nationalite, " +
-                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique, num_tel,code_public" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)";
+                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique, num_tel, code_public" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             int idUtilisateur;
 
@@ -89,7 +96,7 @@ public class AuthentificationDAO {
                 pstmt.setString(5, utilisateur.getDateNaissance().toString());
                 pstmt.setString(6, utilisateur.getNationalite().name());
                 pstmt.setInt(7, utilisateur.getEstInscrit() ? 1 : 0);
-                pstmt.setInt(8, 0); // est_valide = 0
+                pstmt.setInt(8, 0); // est_valide = false
                 pstmt.setInt(9, 1); // doit changer mdp
                 pstmt.setString(10, utilisateur.getEmail());
                 pstmt.setString(11, utilisateur.getNumeroSecurite());
@@ -103,13 +110,13 @@ public class AuthentificationDAO {
                 ResultSet rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
                     idUtilisateur = rs.getInt(1);
-                    utilisateur.setId(idUtilisateur); // affecter l’ID utilisateur
+                    utilisateur.setId(idUtilisateur);
                 } else {
                     throw new SQLException("Échec de création de l'utilisateur : aucun ID généré.");
                 }
             }
 
-            // 2. Insertion dans la table personne avec l’ID utilisateur
+            // Insertion dans la table personne
             String sqlPersonne = "INSERT INTO personne(nom, prenom, date_naissance, nationalite, age, utilisateur_id) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -119,19 +126,24 @@ public class AuthentificationDAO {
                 stmtPersonne.setString(3, utilisateur.getDateNaissance().toString());
                 stmtPersonne.setString(4, utilisateur.getNationalite().name());
                 stmtPersonne.setInt(5, utilisateur.getAge());
-                stmtPersonne.setInt(6, idUtilisateur); // ✅ liaison à l’utilisateur
+                stmtPersonne.setInt(6, utilisateur.getId());
 
                 stmtPersonne.executeUpdate();
             }
 
-            System.out.println("✅ Utilisateur et personne associés enregistrés (id_utilisateur = " + idUtilisateur + ")");
+            System.out.println("✅ Utilisateur et personne associés enregistrés (id_utilisateur = " + utilisateur.getId() + ")");
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Vérifier si l'utilisateur existe déjà dans la base de données
+    /**
+     * Vérifie si un utilisateur avec le login spécifié existe déjà.
+     *
+     * @param login Login à tester.
+     * @return {@code true} si l'utilisateur existe, sinon {@code false}.
+     */
     public boolean userExists(String login) {
         String sql = "SELECT COUNT(*) FROM utilisateur WHERE login = ?";
         try (Connection conn = Database.getConnection();
@@ -148,6 +160,12 @@ public class AuthentificationDAO {
         return false;
     }
 
+    /**
+     * Vérifie si un email est déjà utilisé dans la base.
+     *
+     * @param email Email à tester.
+     * @return {@code true} si l'email existe déjà, sinon {@code false}.
+     */
     public boolean emailExiste(String email) {
         String sql = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
         try (Connection conn = Database.getConnection();
@@ -160,5 +178,4 @@ public class AuthentificationDAO {
         }
         return false;
     }
-
 }

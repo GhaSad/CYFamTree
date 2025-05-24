@@ -20,7 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 
-
+/** Interface listant les demandes de lien de parenté reçues par l'utilisateur. */
 public class DemandesLienPage {
 
     public static void show(Utilisateur utilisateur) {

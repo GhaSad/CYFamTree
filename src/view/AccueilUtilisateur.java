@@ -11,6 +11,7 @@ import model.*;
 
 import java.sql.Connection;
 
+/** Interface d'accueil spécifique à l'utilisateur connecté. */
 public class AccueilUtilisateur extends javafx.application.Application {
 
     private static Utilisateur utilisateurStatic; 

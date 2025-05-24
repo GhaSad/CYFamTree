@@ -4,26 +4,39 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.*;
 
-
+/**
+ * Classe représentant une personne dans l'arbre généalogique.
+ * Elle peut être un utilisateur ou une personne associée.
+ */
 public class Personne {
-	private static int compteurId = 0;
+
+    private static int compteurId = 0;
     private int id;
     private String nom, prenom;
     private LocalDate dateNaissance;
     private Nationalite nationalite;
     private int Age;
     private List<Lien> liens;
-    boolean estInscrit = false;
+    private boolean estInscrit = false;
 
+    /**
+     * Constructeur de la classe Personne.
+     *
+     * @param nom           Nom de la personne.
+     * @param prenom        Prénom de la personne.
+     * @param date          Date de naissance.
+     * @param nationalite   Nationalité.
+     * @param age           Âge calculé ou saisi.
+     */
     public Personne(String nom, String prenom, LocalDate date, Nationalite nationalite, int age) {
-        //this.id = ++compteurId;
-    	this.nom = nom;
+        this.nom = nom;
         this.prenom = prenom;
         this.dateNaissance = date;
         this.nationalite = nationalite;
         this.Age = age;
-        liens = new ArrayList<>();
+        this.liens = new ArrayList<>();
     }
+
     public int getId() {
         return id;
     }
@@ -36,15 +49,6 @@ public class Personne {
         this.estInscrit = estInscrit;
     }
 
-    public void setDateNaissance(LocalDate dateNaissance) {
-        this.dateNaissance = dateNaissance;
-    }
-
-    public void setNationalite(Nationalite nationalite) {
-        this.nationalite = nationalite;
-    }
-
-
     public LocalDate getDateNaissance() {
         return dateNaissance;
     }
@@ -56,27 +60,40 @@ public class Personne {
     public int getAge() {
         return Age;
     }
-    
+
     public String getPrenom() {
-    	return prenom;
+        return prenom;
     }
-    
+
     public String getNom() {
-    	return nom;
+        return nom;
     }
 
     public void setPrenom(String prenom) {
         this.prenom = prenom;
     }
+
     public void setNom(String nom) {
         this.nom = nom;
     }
-    
-    public void creerLienDirect(Personne autre, TypeLien type) {
-        Lien lien = new Lien(this, autre, type);
-        this.liens.add(lien);
+
+    public void setDateNaissance(LocalDate dateNaissance) {
+        this.dateNaissance = dateNaissance;
     }
-    
+
+    public void setNationalite(Nationalite nationalite) {
+        this.nationalite = nationalite;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * Retourne un Optional contenant l'utilisateur si cette personne en est un.
+     *
+     * @return {@code Optional<Utilisateur>}
+     */
     public Optional<Utilisateur> asUtilisateur() {
         if (this instanceof Utilisateur) {
             return Optional.of((Utilisateur) this);
@@ -84,19 +101,34 @@ public class Personne {
         return Optional.empty();
     }
 
+    /**
+     * Crée un lien direct sans validation.
+     *
+     * @param autre Personne liée.
+     * @param type  Type de lien.
+     */
+    public void creerLienDirect(Personne autre, TypeLien type) {
+        Lien lien = new Lien(this, autre, type);
+        this.liens.add(lien);
+    }
 
+    /**
+     * Crée un lien entre deux personnes, avec options pour validation et création de l’inverse.
+     *
+     * @param autre             La personne cible.
+     * @param type              Le type de lien.
+     * @param genererInverse    Si vrai, crée aussi le lien inverse.
+     * @param validerStrictement Si vrai, valide selon les règles métier avancées.
+     */
     public void creerLien(Personne autre, TypeLien type, boolean genererInverse, boolean validerStrictement) {
-      
         Lien lien = new Lien(this, autre, type);
         utils.ValidationResult result = validerStrictement ? lien.estValideAvancee() : new utils.ValidationResult(true, "");
 
         if (!result.isValide()) {
-
             throw new IllegalArgumentException("Lien invalide : " + result.getMessage());
         }
 
         this.liens.add(lien);
-
 
         try (Connection conn = dao.Database.getConnection()) {
             if (this.getId() > 0 && autre.getId() > 0) {
@@ -110,7 +142,7 @@ public class Personne {
             TypeLien inverse = type.getLienInverse();
             if (inverse != null && autre.getLiens().stream().noneMatch(l -> l.getPersonneLiee().equals(this) && l.getTypeLien() == inverse)) {
                 try {
-                    autre.creerLien(this, inverse, false, false); 
+                    autre.creerLien(this, inverse, false, false);
                 } catch (IllegalArgumentException ex) {
                     System.out.println(">>> Le lien inverse a échoué : " + ex.getMessage());
                 }
@@ -118,12 +150,31 @@ public class Personne {
         }
     }
 
-
-    
+    /**
+     * Crée un lien avec validation stricte et génération automatique de l’inverse.
+     *
+     * @param autre Personne cible.
+     * @param type  Type de lien.
+     */
     public void creerLien(Personne autre, TypeLien type) {
         this.creerLien(autre, type, true, true);
     }
-    
+
+    /**
+     * Supprime cette personne en supprimant tous les liens associés dans la liste passée.
+     *
+     * @param toutesLesPersonnes Liste de toutes les personnes du système.
+     */
+    public void supprimer(List<Personne> toutesLesPersonnes) {
+        this.liens.clear();
+
+        for (Personne autre : toutesLesPersonnes) {
+            if (autre != this) {
+                autre.liens.removeIf(lien -> lien.getPersonneLiee().equals(this));
+            }
+        }
+    }
+
     public List<Lien> getLiens() {
         return liens;
     }
@@ -167,33 +218,12 @@ public class Personne {
         }
         return soeurs;
     }
-    
-    
-    public void modifierDetails(){
-
-    }
-
-    public void supprimer(List<Personne> toutesLesPersonnes) {
-        this.liens.clear();
-
-        for (Personne autre : toutesLesPersonnes) {
-            if (autre != this) {
-                autre.liens.removeIf(lien -> lien.getPersonneLiee().equals(this));
-            }
-        }
-    }
-    
-    public void setId(int id) {
-        this.id = id;
-    }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof Personne)) return false;
-        Personne other = (Personne) obj;
-        return this.getId() == other.getId();
+        if (obj == null || !(obj instanceof Personne)) return false;
+        return this.getId() == ((Personne) obj).getId();
     }
 
     @Override
@@ -201,9 +231,8 @@ public class Personne {
         return Integer.hashCode(getId());
     }
 
-
     @Override
     public String toString() {
-    	return "ID : " +id + " Nom : " + nom + " Prenom ; " + prenom + " Date : " +dateNaissance + "";
+        return "ID : " + id + " Nom : " + nom + " Prenom : " + prenom + " Date : " + dateNaissance;
     }
 }

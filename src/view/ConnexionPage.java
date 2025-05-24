@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Utilisateur;
 
+/** Interface de connexion utilisateur à l'application. */
 public class ConnexionPage {
 
     private Stage stage;

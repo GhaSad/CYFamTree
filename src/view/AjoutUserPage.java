@@ -14,6 +14,7 @@ import utils.EmailService;
 
 import java.util.Optional;
 
+/** Interface permettant d'ajouter un utilisateur existant à son arbre via un code public. */
 public class AjoutUserPage {
 
     private Utilisateur utilisateurCourant;

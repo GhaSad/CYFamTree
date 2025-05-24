@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Utilisateur;
 
+/** Interface permettant à l'utilisateur de modifier son mot de passe. */
 public class ChangementMDPPage {
 
     private Stage stage;

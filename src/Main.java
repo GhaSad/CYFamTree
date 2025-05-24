@@ -1,8 +1,9 @@
-package view;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import view.AccueilPage;
 
+/** Point d’entrée principal de l'application JavaFX. */
 public class Main extends Application {
 
     @Override

@@ -5,6 +5,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.StageStyle;
 
+/** Boîte de dialogue pour l'authentification administrateur. */
 public class AdminLoginDialog {
 
     private static final String ADMIN_PASSWORD = "admin123"; // Mot de passe (à sécuriser en prod)

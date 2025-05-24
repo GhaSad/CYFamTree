@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+/** Interface d'accueil principale de l'application. */
 public class AccueilPage {
 
     private Stage stage;

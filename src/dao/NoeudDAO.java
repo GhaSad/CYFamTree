@@ -5,13 +5,28 @@ import model.*;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * DAO responsable des opérations sur les nœuds de l’arbre généalogique dans la base de données.
+ * Il permet de sauvegarder des nœuds, mettre à jour leur lien avec un arbre et charger l’arbre complet.
+ */
 public class NoeudDAO {
     private Connection connection;
 
+    /**
+     * Constructeur prenant une connexion à la base de données.
+     * @param connection Connexion active à la base.
+     */
     public NoeudDAO(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Insère un nœud dans la base de données et récupère son ID généré automatiquement.
+     *
+     * @param noeud Le nœud à sauvegarder.
+     * @param idArbre L’ID de l’arbre auquel appartient ce nœud.
+     * @throws SQLException Si une erreur SQL survient.
+     */
     public void sauvegarderNoeud(Noeud noeud, int idArbre) throws SQLException {
         String sql = "INSERT INTO noeud (id_personne, visibilite, arbre_id) VALUES (?, ?, ?)";
         Personne p = noeud.getPersonne();
@@ -24,7 +39,7 @@ public class NoeudDAO {
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    noeud.setId(rs.getInt(1)); // ✅ très important pour les liens
+                    noeud.setId(rs.getInt(1));
                 } else {
                     throw new SQLException("Échec de récupération de l'ID du nœud.");
                 }
@@ -32,6 +47,13 @@ public class NoeudDAO {
         }
     }
 
+    /**
+     * Met à jour l’ID de l’arbre pour un nœud existant en base.
+     *
+     * @param noeud Le nœud à mettre à jour.
+     * @param idArbre Le nouvel ID de l’arbre.
+     * @throws SQLException Si une erreur SQL survient.
+     */
     public void ajouterArbreIdAuNoeud(Noeud noeud, int idArbre) throws SQLException {
         String sql = "UPDATE noeud SET arbre_id = ? WHERE id_personne = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -41,11 +63,19 @@ public class NoeudDAO {
         }
     }
 
+    /**
+     * Charge complètement un arbre généalogique (avec ses nœuds et ses relations) à partir de son ID.
+     *
+     * @param utilisateur L’utilisateur propriétaire de l’arbre.
+     * @param idArbre L’identifiant de l’arbre à charger.
+     * @return L’arbre généalogique reconstruit.
+     * @throws SQLException En cas d’erreur de récupération depuis la base.
+     */
     public ArbreGenealogique chargerArbreComplet(Utilisateur utilisateur, int idArbre) throws SQLException {
         ArbreGenealogique arbre = null;
         Map<Integer, Noeud> noeudsMap = new HashMap<>();
 
-        // 🔹 Charger la racine de l’arbre
+        // 🔹 Récupérer la personne racine de l’arbre
         String sqlRacine = "SELECT racine_id FROM arbre WHERE id = ?";
         try (PreparedStatement stmtR = connection.prepareStatement(sqlRacine)) {
             stmtR.setInt(1, idArbre);
@@ -77,7 +107,7 @@ public class NoeudDAO {
             throw new SQLException("❌ Erreur : arbre non instancié");
         }
 
-        // 🔹 Charger tous les noeuds de cet arbre
+        // 🔹 Charger tous les nœuds de l’arbre
         String sqlNoeuds = "SELECT id_noeud, id_personne, visibilite FROM noeud WHERE arbre_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sqlNoeuds)) {
             stmt.setInt(1, idArbre);
@@ -96,7 +126,7 @@ public class NoeudDAO {
             }
         }
 
-        // 🔹 Relations parent-enfant (avec filtre correct par arbre)
+        // 🔹 Reconstituer les liens parent-enfant
         String sqlRelations = "SELECT id_parent, id_enfant FROM noeud_lien WHERE arbre_id = ?";
         try (PreparedStatement stmtRel = connection.prepareStatement(sqlRelations)) {
             stmtRel.setInt(1, idArbre);
@@ -115,7 +145,7 @@ public class NoeudDAO {
             }
         }
 
-        // 🔹 Ajouter les noeuds dans l’arbre en mémoire
+        // 🔹 Ajout des nœuds à l’arbre
         for (Noeud n : noeudsMap.values()) {
             arbre.ajouterNoeud(n);
         }

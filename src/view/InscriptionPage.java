@@ -16,9 +16,9 @@ import service.EmailService;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Random;
 
+/** Interface d'inscription à l'application pour un nouvel utilisateur. */
 public class InscriptionPage {
 
     private Stage stage;

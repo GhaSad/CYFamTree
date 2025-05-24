@@ -8,7 +8,14 @@ import java.util.List;
 import org.mindrot.jbcrypt.BCrypt;
 import java.util.Optional;
 
+
 public class UtilisateurDAO {
+
+    /**
+     * Récupère tous les utilisateurs qui n'ont pas encore été validés.
+     *
+     * @return Liste des utilisateurs en attente de validation.
+     */
 
     public List<Utilisateur> findAllEnAttenteValidation() {
         List<Utilisateur> utilisateurs = new ArrayList<>();
@@ -45,6 +52,12 @@ public class UtilisateurDAO {
         return utilisateurs;
     }
 
+    /**
+     * Récupère tous les utilisateurs de la base.
+     *
+     * @return Liste de tous les utilisateurs.
+     */
+
     public List<Utilisateur> findAll() {
         List<Utilisateur> utilisateurs = new ArrayList<>();
         String sql = "SELECT * FROM utilisateur";
@@ -79,6 +92,11 @@ public class UtilisateurDAO {
         return utilisateurs;
     }
 
+    /**
+     * Valide un utilisateur en mettant à jour les colonnes `est_valide` et `est_inscrit`.
+     *
+     * @param login Le login de l'utilisateur à valider.
+     */
     public void validerUtilisateur(String login) {
         String sql = "UPDATE utilisateur SET est_valide = 1, est_inscrit = 1 WHERE login = ?";
         try (Connection conn = Database.getConnection();
@@ -90,6 +108,11 @@ public class UtilisateurDAO {
         }
     }
 
+    /**
+     * Supprime un utilisateur de la base.
+     *
+     * @param login Le login de l'utilisateur à supprimer.
+     */
     public void supprimerUtilisateur(String login) {
         String sql = "DELETE FROM utilisateur WHERE login = ?";
         try (Connection conn = Database.getConnection();
@@ -101,6 +124,11 @@ public class UtilisateurDAO {
         }
     }
 
+    /**
+     * Met à jour l'email et le numéro de téléphone d'un utilisateur.
+     *
+     * @param utilisateur L'utilisateur avec les nouvelles informations.
+     */
     public static void updateProfil(Utilisateur utilisateur) {
         String sql = "UPDATE utilisateur SET email = ?, num_tel = ? WHERE login = ?";
 
@@ -118,6 +146,12 @@ public class UtilisateurDAO {
         }
     }
 
+    /**
+     * Met à jour le mot de passe d'un utilisateur et réinitialise le flag `doit_changer_mdp`.
+     *
+     * @param login      Login de l'utilisateur.
+     * @param nouveauMdp Nouveau mot de passe en clair.
+     */
     public static void updateMotDePasse(String login, String nouveauMdp) {
         String hash = BCrypt.hashpw(nouveauMdp, BCrypt.gensalt());
 
@@ -136,6 +170,14 @@ public class UtilisateurDAO {
         }
     }
 
+    /**
+     * Recherche les utilisateurs correspondant à des critères facultatifs : nom, prénom, nationalité.
+     *
+     * @param nom  Le nom à filtrer (peut être vide).
+     * @param prenom Le prénom à filtrer (peut être vide).
+     * @param nat  La nationalité (peut être null).
+     * @return Liste des utilisateurs correspondants.
+     */
     public List<Utilisateur> rechercherParCritere(String nom, String prenom, Nationalite nat) {
         List<Utilisateur> utilisateurs = new ArrayList<>();
         String sql = "SELECT * FROM utilisateur WHERE 1=1";
@@ -190,6 +232,13 @@ public class UtilisateurDAO {
         return utilisateurs;
     }
 
+
+    /**
+     * Recherche un utilisateur par son identifiant unique.
+     *
+     * @param id L'identifiant de l'utilisateur.
+     * @return L'utilisateur trouvé ou null s'il n'existe pas.
+     */
     public static Utilisateur trouverParId(int id) {
         String sql = "SELECT * FROM utilisateur WHERE id = ?";
 
@@ -241,6 +290,13 @@ public class UtilisateurDAO {
         return null;
     }
 
+
+    /**
+     * Recherche un utilisateur par son code public (ex: "CY1234").
+     *
+     * @param code Le code public à rechercher.
+     * @return Un Optional contenant l'utilisateur trouvé, ou vide si aucun trouvé.
+     */
     public Optional<Utilisateur> trouverParCodePublic(String code) {
         String sql = "SELECT * FROM utilisateur WHERE code_public = ?";
         try (Connection conn = Database.getConnection();

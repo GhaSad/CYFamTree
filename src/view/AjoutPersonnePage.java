@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.Period;
 
+/** Interface permettant d'ajouter une personne manuellement dans l'arbre généalogique. */
 public class AjoutPersonnePage {
 
     private Utilisateur utilisateur;

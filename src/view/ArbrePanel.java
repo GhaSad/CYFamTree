@@ -10,6 +10,7 @@ import model.*;
 
 import java.util.*;
 
+/** Panneau d'affichage de l'arbre généalogique (JavaFX personnalisé). */
 public class ArbrePanel extends Pane {
 
     private final ArbreGenealogique arbre;

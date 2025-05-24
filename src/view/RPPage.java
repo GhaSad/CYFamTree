@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+/** Interface de gestion des ressources partagées entre utilisateurs. */
 public class RPPage {
 
     private final Stage stage;
@@ -87,11 +88,25 @@ public class RPPage {
                 return;
             }
 
-            RessourcePartagee res = new RessourcePartagee(type, fichier.getAbsolutePath(), utilisateur, List.of(destinataire));
             try {
+                File dossierDestination = new File("ressources_partagees");
+                if (!dossierDestination.exists()) dossierDestination.mkdirs();
+
+                // Construire le nom de fichier unique
+                String nouveauNom = System.currentTimeMillis() + "_" + fichier.getName();
+                File destination = new File(dossierDestination, nouveauNom);
+
+                // Copier le fichier dans le dossier local
+                java.nio.file.Files.copy(fichier.toPath(), destination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                // Créer la ressource avec le chemin du fichier copié
+                RessourcePartagee res = new RessourcePartagee(type, destination.getPath(), utilisateur, List.of(destinataire));
+
+                // Sauvegarde en base
                 RessourceDAO.sauvegarder(res, destinataire.getId());
                 showAlert("✅ Ressource envoyée avec succès à " + destinataire.getPrenom());
-            } catch (SQLException ex) {
+
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 showAlert("❌ Erreur lors de l'envoi de la ressource.");
             }
