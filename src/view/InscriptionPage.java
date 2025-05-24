@@ -60,10 +60,6 @@ public class InscriptionPage {
         form.setVgap(12);
         form.setAlignment(Pos.CENTER);
 
-        Label loginLabel = new Label("Login :");
-        loginField = new TextField();
-        loginField.setPromptText("Choisissez un login");
-
         Label nomLabel = new Label("Nom :");
         nomField = new TextField();
         nomField.setPromptText("Votre nom");
@@ -119,10 +115,6 @@ public class InscriptionPage {
             File fichier = fileChooser.showOpenDialog(stage);
             if (fichier != null) cheminPhotoField.setText(fichier.getAbsolutePath());
         });
-
-        // Positionnement des éléments
-        form.add(loginLabel, 0, 0);
-        form.add(loginField, 1, 0);
 
         form.add(nomLabel, 0, 2);
         form.add(nomField, 1, 2);
@@ -181,9 +173,10 @@ public class InscriptionPage {
 
 
     private void handleRegister() {
-        String login = loginField.getText().trim();
         String nom = nomField.getText().trim();
         String prenom = prenomField.getText().trim();
+        String login = (prenom + nom).toLowerCase().replaceAll("\\s+", "") + (int)(Math.random() * 90 + 10); // 2 chiffres aléatoires
+        String codePublic = "CY"+ (int)(Math.random() * 90 + 10);
         String email = emailField.getText().trim();
         String numeroSecu = numeroSecuField.getText().trim();
         String numTel = numTelField.getText().trim();
@@ -230,7 +223,7 @@ public class InscriptionPage {
 
         Utilisateur utilisateur = new Utilisateur(
                 nom, prenom, dateNaissance, nationalite, 0,
-                true, false, email, numeroSecu, carteIdentitePath, photoPath, numTel
+                true, false, email, numeroSecu, carteIdentitePath, photoPath, numTel,codePublic
         );
 
         try {
@@ -238,8 +231,13 @@ public class InscriptionPage {
             EmailService.envoyerMail(
                     email,
                     "Bienvenue sur CYFamTree !",
-                    "Bonjour " + prenom + ",\n\nMerci pour votre inscription sur CYFamTree.\n" +
-                            "Votre mot de passe initial est : " + prenom + "\n\nVotre compte sera validé sous peu.\n\nL'équipe CYFamTree"
+                    "Bonjour " + prenom + ",\n\n" +
+                            "Merci pour votre inscription sur CYFamTree.\n\n" +
+                            "🆔 Votre code privé (login) : " + login + "\n" +
+                            "🔑 Votre mot de passe initial : " + prenom + "\n" +
+                            "🌐 Votre code public : " + codePublic + "\n\n" +
+                            "Votre compte sera validé sous peu par un administrateur.\n\n" +
+                            "L'équipe CYFamTree"
             );
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Inscription enregistrée !\nMot de passe initial : votre prénom.");
             stage.close();

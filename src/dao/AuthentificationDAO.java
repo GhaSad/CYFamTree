@@ -38,7 +38,8 @@ public class AuthentificationDAO {
                             rs.getString("numero_securite"),
                             rs.getString("carte_identite"),
                             rs.getString("photo_numerique"),
-                            rs.getString("num_tel") // ✅ Ajout du champ numéro de téléphone
+                            rs.getString("num_tel"),
+                            rs.getString("code_public")
                     );
 
                     user.setLogin(rs.getString("login"));
@@ -72,8 +73,8 @@ public class AuthentificationDAO {
             // 1. Insertion dans la table utilisateur
             String sqlUtilisateur = "INSERT INTO utilisateur(" +
                     "login, mot_de_passe, nom, prenom, date_naissance, nationalite, " +
-                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique, num_tel" +
-                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+                    "est_inscrit, est_valide, doit_changer_mdp, email, numero_securite, carte_identite, photo_numerique, num_tel,code_public" +
+                    ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)";
 
             int idUtilisateur;
 
@@ -95,6 +96,7 @@ public class AuthentificationDAO {
                 pstmt.setString(12, utilisateur.getCarteIdentite());
                 pstmt.setString(13, utilisateur.getPhotoNumerique());
                 pstmt.setString(14, utilisateur.getNumTel());
+                pstmt.setString(15, utilisateur.getCodePublic());
 
                 pstmt.executeUpdate();
 

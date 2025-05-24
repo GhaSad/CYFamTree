@@ -31,7 +31,9 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel")
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
+
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -64,7 +66,8 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel")
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -109,7 +112,8 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel")
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
                 );
                 u.setId(rs.getInt("id"));
                 u.setLogin(rs.getString("login"));
@@ -207,7 +211,8 @@ public class UtilisateurDAO {
                         rs.getString("numero_securite"),
                         rs.getString("carte_identite"),
                         rs.getString("photo_numerique"),
-                        rs.getString("num_tel") // ✅ ajout du nouveau champ ici
+                        rs.getString("num_tel"), // ✅ ajout du nouveau champ ici
+                        rs.getString("code_public")
                 );
                 u.setLogin(rs.getString("login"));
                 u.setId(rs.getInt("id"));
@@ -241,6 +246,7 @@ public class UtilisateurDAO {
                 String carteId = rs.getString("carte_identite");
                 String photo = rs.getString("photo_numerique");
                 String numTel = rs.getString("num_tel");
+                String code_public = rs.getString("code_public");
 
                 Utilisateur utilisateur = new Utilisateur(
                         nom,
@@ -254,7 +260,8 @@ public class UtilisateurDAO {
                         numSec,
                         carteId,
                         photo,
-                        numTel // ou remplacer si tu as un champ "num_tel"
+                        numTel,
+                        code_public// ou remplacer si tu as un champ "num_tel"
                 );
                 utilisateur.setId(id);
                 utilisateur.setLogin(rs.getString("login"));

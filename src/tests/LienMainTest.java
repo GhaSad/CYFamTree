@@ -14,8 +14,8 @@ import java.time.LocalDate;
 public class LienMainTest {
     public static void main(String[] args) {
         // Création de deux utilisateurs
-        Utilisateur alice = new Utilisateur("Alice", "Durand", LocalDate.of(1990, 1, 1), Nationalite.FRANCAIS, 34, true, true,"email@gage.com","12233","12434","aofaeof","1461645646");
-        Utilisateur bob = new Utilisateur("Bob", "Martin", LocalDate.of(1995, 1, 1), Nationalite.FRANCAIS, 29, true, true,"email@gage.com","12233","12434","aofaeof","191643464");
+        Utilisateur alice = new Utilisateur("Alice", "Durand", LocalDate.of(1990, 1, 1), Nationalite.FRANCAIS, 34, true, true,"email@gage.com","12233","12434","aofaeof","1461645646","ara");
+        Utilisateur bob = new Utilisateur("Bob", "Martin", LocalDate.of(1995, 1, 1), Nationalite.FRANCAIS, 29, true, true,"email@gage.com","12233","12434","aofaeof","191643464","pkp");
 
         alice.setEmail("alice@example.com");
         bob.setEmail("bob@example.com");
