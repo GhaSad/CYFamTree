@@ -17,6 +17,7 @@ import service.EmailService;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Random;
 
 public class InscriptionPage {
 
@@ -176,7 +177,7 @@ public class InscriptionPage {
         String nom = nomField.getText().trim();
         String prenom = prenomField.getText().trim();
         String login = (prenom + nom).toLowerCase().replaceAll("\\s+", "") + (int)(Math.random() * 90 + 10); // 2 chiffres aléatoires
-        String codePublic = "CY"+ (int)(Math.random() * 90 + 10);
+        String codePublic = "CY" + String.format("%04d", new Random().nextInt(10000));
         String email = emailField.getText().trim();
         String numeroSecu = numeroSecuField.getText().trim();
         String numTel = numTelField.getText().trim();

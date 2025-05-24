@@ -277,5 +277,42 @@ public class UtilisateurDAO {
         return null;
     }
 
+    public Optional<Utilisateur> trouverParCodePublic(String code) {
+        String sql = "SELECT * FROM utilisateur WHERE code_public = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, code);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Utilisateur u = new Utilisateur(
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        LocalDate.parse(rs.getString("date_naissance")),
+                        Nationalite.valueOf(rs.getString("nationalite")),
+                        0,
+                        rs.getInt("est_inscrit") == 1,
+                        rs.getInt("est_valide") == 1,
+                        rs.getString("email"),
+                        rs.getString("numero_securite"),
+                        rs.getString("carte_identite"),
+                        rs.getString("photo_numerique"),
+                        rs.getString("num_tel"),
+                        rs.getString("code_public")
+                );
+                u.setLogin(rs.getString("login"));
+                u.setId(rs.getInt("id"));
+                return Optional.of(u);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
+    }
+
+
 
 }
