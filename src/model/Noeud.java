@@ -48,10 +48,6 @@ public class Noeud {
         }
     }
 
-    public void changerVisibilite(Visibilite v) {
-        this.visibilite = v;
-    }
-
 
     public Personne getPersonne() {
         return personne;
@@ -69,11 +65,4 @@ public class Noeud {
         return visibilite;
     }
 
-  
-    public void afficher(int niveau) {
-        for (int i = 0; i < niveau; i++)
-        for (Noeud enfant : enfants) {
-            enfant.afficher(niveau + 1);
-        }
-    }
 }

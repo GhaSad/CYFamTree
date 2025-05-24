@@ -17,7 +17,4 @@ public enum Nationalite {
         this.libelle = libelle;
     }
 
-    public String getLibelle() {
-        return libelle;
-    }
 }

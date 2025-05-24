@@ -28,18 +28,19 @@ public class ProfileLectureSeulePage {
         Label prenomLabel = new Label("Prénom : " + utilisateur.getPrenom());
         Label dateNaissanceLabel = new Label("Date de naissance : " + utilisateur.getDateNaissance());
         Label nationaliteLabel = new Label("Nationalité : " + utilisateur.getNationalite());
-
-        // Pas d'email, pas de téléphone, pas de mot de passe
+        Label codePublicLabel = new Label("Code public : " + utilisateur.getCodePublic());
 
         root.getChildren().addAll(
                 new Label("Profil (lecture seule)"),
                 nomLabel,
                 prenomLabel,
                 dateNaissanceLabel,
-                nationaliteLabel
+                nationaliteLabel,
+                codePublicLabel
         );
 
         stage.setScene(new Scene(root, 350, 300));
         stage.show();
     }
+
 }

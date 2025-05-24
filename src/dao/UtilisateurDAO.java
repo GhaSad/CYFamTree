@@ -90,42 +90,6 @@ public class UtilisateurDAO {
         }
     }
 
-    public Optional<Utilisateur> trouverParLoginOuSecu(String login, String numeroSecu) {
-        String sql = "SELECT * FROM utilisateur WHERE login = ? OR numero_securite = ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, login);
-            stmt.setString(2, numeroSecu);
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                Utilisateur u = new Utilisateur(
-                        rs.getString("nom"),
-                        rs.getString("prenom"),
-                        LocalDate.parse(rs.getString("date_naissance")),
-                        Nationalite.valueOf(rs.getString("nationalite")),
-                        0,
-                        rs.getInt("est_inscrit") == 1,
-                        rs.getInt("est_valide") == 1,
-                        rs.getString("email"),
-                        rs.getString("numero_securite"),
-                        rs.getString("carte_identite"),
-                        rs.getString("photo_numerique"),
-                        rs.getString("num_tel"),
-                        rs.getString("code_public")
-                );
-                u.setId(rs.getInt("id"));
-                u.setLogin(rs.getString("login"));
-                return Optional.of(u);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-
     public void supprimerUtilisateur(String login) {
         String sql = "DELETE FROM utilisateur WHERE login = ?";
         try (Connection conn = Database.getConnection();

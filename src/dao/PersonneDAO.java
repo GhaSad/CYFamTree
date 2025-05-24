@@ -38,37 +38,6 @@ public class PersonneDAO {
 	    }
 	}
 
-	public static int sauvegarder(Personne p, int utilisateurId) throws SQLException {
-		String sql = "INSERT INTO personne (nom, prenom, date_naissance, nationalite, age, utilisateur_id) VALUES (?, ?, ?, ?, ?, ?)";
-
-		try (Connection conn = Database.getConnection();
-			 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-			stmt.setString(1, p.getNom());
-			stmt.setString(2, p.getPrenom());
-			stmt.setString(3, p.getDateNaissance().toString());
-			stmt.setString(4, p.getNationalite().toString());
-			stmt.setInt(5, p.getAge());
-			stmt.setInt(6, utilisateurId);
-
-			int affectedRows = stmt.executeUpdate();
-
-			if (affectedRows == 0) {
-				throw new SQLException("Échec de la création de la personne liée à un utilisateur.");
-			}
-
-			try (ResultSet rs = stmt.getGeneratedKeys()) {
-				if (rs.next()) {
-					int id = rs.getInt(1);
-					p.setId(id);
-					return id;
-				} else {
-					throw new SQLException("Aucun ID généré.");
-				}
-			}
-		}
-	}
-
 	public static Personne trouverPersonneParId(int id) throws SQLException {
         String sql = "SELECT * FROM personne WHERE id_personne = ?";
 

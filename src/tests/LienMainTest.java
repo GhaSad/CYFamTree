@@ -22,7 +22,7 @@ public class LienMainTest {
 
         // Alice demande un lien avec Bob
         Lien lien = new Lien(alice, bob, TypeLien.FRERE);
-        boolean resultat = lien.estValide(); // Cela déclenche l'ajout dans LienManager
+        boolean resultat = lien.estValideAvancee().isValide(); // Cela déclenche l'ajout dans LienManager
 
         System.out.println("Lien validé immédiatement ? " + resultat);
 

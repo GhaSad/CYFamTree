@@ -1,5 +1,7 @@
 package view;
 
+import dao.RessourceDAO;
+import dao.UtilisateurDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -7,19 +9,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import model.Personne;
 import model.RessourcePartagee;
 import model.TypeRessource;
 import model.Utilisateur;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class RPPage {
 
-    private Stage stage;
-    private Utilisateur utilisateur;
+    private final Stage stage;
+    private final Utilisateur utilisateur;
     private VBox ressourcesBox;
 
     public RPPage(Utilisateur utilisateur) {
@@ -35,7 +37,7 @@ public class RPPage {
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.TOP_CENTER);
 
-        Label titre = new Label("Mes ressources reçues");
+        Label titre = new Label("📂 Mes ressources reçues");
         titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         ressourcesBox = new VBox(10);
@@ -44,21 +46,19 @@ public class RPPage {
 
         Separator sep = new Separator();
 
-        Label partageLabel = new Label("Partager une ressource");
+        Label partageLabel = new Label("📤 Partager une ressource");
         partageLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        ComboBox<Personne> destinataireBox = new ComboBox<>();
-        destinataireBox.setPromptText("Choisir un destinataire");
-        destinataireBox.getItems().setAll(getMembresFamille(utilisateur)); // à implémenter
+        TextField codePublicField = new TextField();
+        codePublicField.setPromptText("Code public du destinataire (ex: CY79)");
 
         ComboBox<TypeRessource> typeBox = new ComboBox<>();
         typeBox.getItems().setAll(TypeRessource.values());
         typeBox.setPromptText("Type de ressource");
 
-        Button btnChoisirFichier = new Button("Choisir un fichier");
         Label fichierLabel = new Label("Aucun fichier choisi");
-
         final File[] fichierSelectionne = new File[1];
+        Button btnChoisirFichier = new Button("Choisir un fichier");
         btnChoisirFichier.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             File f = fileChooser.showOpenDialog(stage);
@@ -70,22 +70,34 @@ public class RPPage {
 
         Button btnEnvoyer = new Button("Envoyer");
         btnEnvoyer.setOnAction(e -> {
-            Personne dest = destinataireBox.getValue();
+            String codePublic = codePublicField.getText().trim();
+            Optional<Utilisateur> destOpt = new UtilisateurDAO().trouverParCodePublic(codePublic);
+
+            if (destOpt.isEmpty()) {
+                showAlert("Aucun utilisateur trouvé avec ce code public.");
+                return;
+            }
+
+            Utilisateur destinataire = destOpt.get();
             TypeRessource type = typeBox.getValue();
             File fichier = fichierSelectionne[0];
 
-            if (dest == null || type == null || fichier == null) {
+            if (type == null || fichier == null) {
                 showAlert("Veuillez remplir tous les champs.");
                 return;
             }
 
-            // Créer et sauvegarder la ressource partagée
-            RessourcePartagee res = new RessourcePartagee(type, fichier.getAbsolutePath(), utilisateur, List.of(dest));
-            // TODO : Sauvegarder la ressource dans la base (DAO à implémenter)
-            showAlert("Ressource envoyée avec succès à " + dest.getPrenom());
+            RessourcePartagee res = new RessourcePartagee(type, fichier.getAbsolutePath(), utilisateur, List.of(destinataire));
+            try {
+                RessourceDAO.sauvegarder(res, destinataire.getId());
+                showAlert("✅ Ressource envoyée avec succès à " + destinataire.getPrenom());
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+                showAlert("❌ Erreur lors de l'envoi de la ressource.");
+            }
         });
 
-        VBox partageBox = new VBox(10, destinataireBox, typeBox, btnChoisirFichier, fichierLabel, btnEnvoyer);
+        VBox partageBox = new VBox(10, codePublicField, typeBox, btnChoisirFichier, fichierLabel, btnEnvoyer);
         partageBox.setAlignment(Pos.CENTER);
 
         Button btnRetour = new Button("Retour");
@@ -94,35 +106,48 @@ public class RPPage {
             AccueilUtilisateur.show(utilisateur);
         });
 
-        root.getChildren().addAll(titre, ressourcesBox, sep, partageLabel, partageBox,btnRetour);
+        root.getChildren().addAll(titre, ressourcesBox, sep, partageLabel, partageBox, btnRetour);
 
         stage.setScene(new Scene(root, 600, 600));
         stage.show();
     }
 
     private void chargerRessourcesRecues() {
-        // TODO : charger depuis la base les ressources dont utilisateur est destinataire
-        List<RessourcePartagee> recues = new ArrayList<>();
+        ressourcesBox.getChildren().clear();
+        try {
+            List<RessourcePartagee> recues = RessourceDAO.getRessourcesPour(utilisateur.getId());
 
-        // exemple fictif
-        // recues = RessourceDAO.getRessourcesPour(utilisateur);
+            if (recues.isEmpty()) {
+                ressourcesBox.getChildren().add(new Label("Aucune ressource reçue."));
+            } else {
+                for (RessourcePartagee res : recues) {
+                    Label label = new Label("📁 " + res.getAuteur().getPrenom() + " a partagé : " + res.getFichier() + " (" + res.getTypeRessource() + ")");
 
-        if (recues.isEmpty()) {
-            ressourcesBox.getChildren().add(new Label("Aucune ressource reçue."));
-        } else {
-            for (RessourcePartagee res : recues) {
-                ressourcesBox.getChildren().add(new Label(res.getAuteur().getPrenom() + " a partagé : " + res.getFichier()));
+                    Button ouvrirBtn = new Button("Ouvrir");
+                    ouvrirBtn.setOnAction(ev -> {
+                        try {
+                            File fichier = new File(res.getFichier());
+                            if (fichier.exists()) {
+                                java.awt.Desktop.getDesktop().open(fichier);
+                            } else {
+                                showAlert("Fichier introuvable : " + fichier.getAbsolutePath());
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            showAlert("Impossible d'ouvrir le fichier.");
+                        }
+                    });
+
+                    HBox ligne = new HBox(10, label, ouvrirBtn);
+                    ligne.setAlignment(Pos.CENTER_LEFT);
+                    ressourcesBox.getChildren().add(ligne);
+                }
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            ressourcesBox.getChildren().add(new Label("❌ Erreur de chargement des ressources."));
         }
-    }
-
-    private List<Personne> getMembresFamille(Utilisateur u) {
-        // TODO : retourner uniquement les personnes liées à l'utilisateur dans son arbre
-        return new ArrayList<>();
-    }
-
-    public void show(){
-        stage.show();
     }
 
     private void showAlert(String message) {
@@ -130,5 +155,9 @@ public class RPPage {
         alert.setHeaderText(null);
         alert.setTitle("Information");
         alert.showAndWait();
+    }
+
+    public void show() {
+        stage.show();
     }
 }

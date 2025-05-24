@@ -21,6 +21,26 @@ public class RessourcePartagee {
         this.idRessource += compteur++;
     }
 
+    public int getIdRessource() {
+        return idRessource;
+    }
+
+    public TypeRessource getTypeRessource() {
+        return typeRessource;
+    }
+
+    public void setIdRessource(int idRessource) {
+        this.idRessource = idRessource;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
     public Personne getAuteur() {
         return auteur;
     }

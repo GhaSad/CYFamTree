@@ -147,4 +147,18 @@ public class AuthentificationDAO {
         }
         return false;
     }
+
+    public boolean emailExiste(String email) {
+        String sql = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

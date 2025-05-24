@@ -207,6 +207,12 @@ public class InscriptionPage {
             return;
         }
 
+        if (authentificationDAO.emailExiste(email)) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Cet email est déjà utilisé.");
+            return;
+        }
+
+
         // Numéro de sécurité sociale (13 chiffres, éventuellement séparés par espaces)
         if (!numeroSecu.matches("^\\d{13}$") && !numeroSecu.matches("^(\\d{1} \\d{2} \\d{2} \\d{2} \\d{3} \\d{3})$")) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Numéro de sécurité sociale invalide. Format attendu : 1 23 45 67 890 123");
