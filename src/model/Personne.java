@@ -120,9 +120,9 @@ public class Personne {
      * @param genererInverse    Si vrai, crée aussi le lien inverse.
      * @param validerStrictement Si vrai, valide selon les règles métier avancées.
      */
-    public void creerLien(Personne autre, TypeLien type, boolean genererInverse, boolean validerStrictement) {
+    public void creerLien(Personne autre, TypeLien type, ArbreGenealogique arbre, boolean genererInverse, boolean validerStrictement) {
         Lien lien = new Lien(this, autre, type);
-        utils.ValidationResult result = validerStrictement ? lien.estValideAvancee() : new utils.ValidationResult(true, "");
+        utils.ValidationResult result = validerStrictement ? lien.estValideAvancee(arbre) : new utils.ValidationResult(true, "");
 
         if (!result.isValide()) {
             throw new IllegalArgumentException("Lien invalide : " + result.getMessage());
@@ -142,7 +142,7 @@ public class Personne {
             TypeLien inverse = type.getLienInverse();
             if (inverse != null && autre.getLiens().stream().noneMatch(l -> l.getPersonneLiee().equals(this) && l.getTypeLien() == inverse)) {
                 try {
-                    autre.creerLien(this, inverse, false, false);
+                    autre.creerLien(this, inverse, arbre, false, false);
                 } catch (IllegalArgumentException ex) {
                     System.out.println(">>> Le lien inverse a échoué : " + ex.getMessage());
                 }
@@ -150,15 +150,17 @@ public class Personne {
         }
     }
 
+
     /**
      * Crée un lien avec validation stricte et génération automatique de l’inverse.
      *
      * @param autre Personne cible.
      * @param type  Type de lien.
      */
-    public void creerLien(Personne autre, TypeLien type) {
-        this.creerLien(autre, type, true, true);
+    public void creerLien(Personne autre, TypeLien type, ArbreGenealogique arbre) {
+        this.creerLien(autre, type, arbre, true, true);
     }
+
 
     /**
      * Supprime cette personne en supprimant tous les liens associés dans la liste passée.

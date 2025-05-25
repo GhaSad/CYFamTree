@@ -19,6 +19,7 @@ public class NoeudDAO {
     public NoeudDAO(Connection connection) {
         this.connection = connection;
     }
+    
 
     /**
      * Insère un nœud dans la base de données et récupère son ID généré automatiquement.
@@ -48,12 +49,28 @@ public class NoeudDAO {
     }
 
     /**
-     * Met à jour l’ID de l’arbre pour un nœud existant en base.
+     * Enregistre un lien parent-enfant dans la table noeud_lien, uniquement si les deux noeuds ont un ID valide.
      *
-     * @param noeud Le nœud à mettre à jour.
-     * @param idArbre Le nouvel ID de l’arbre.
+     * @param parent Le nœud parent.
+     * @param enfant Le nœud enfant.
+     * @param idArbre L’ID de l’arbre concerné.
      * @throws SQLException Si une erreur SQL survient.
      */
+    public void enregistrerLienParentEnfant(Noeud parent, Noeud enfant, int idArbre) throws SQLException {
+        if (parent.getId() <= 0 || enfant.getId() <= 0) {
+            throw new IllegalArgumentException("Les nœuds doivent avoir un ID valide avant l'enregistrement des liens.");
+        }
+
+        String sql = "INSERT INTO noeud_lien (id_parent, id_enfant, arbre_id) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, parent.getId());
+            stmt.setInt(2, enfant.getId());
+            stmt.setInt(3, idArbre);
+            stmt.executeUpdate();
+        }
+    }
+
+
     public void ajouterArbreIdAuNoeud(Noeud noeud, int idArbre) throws SQLException {
         String sql = "UPDATE noeud SET arbre_id = ? WHERE id_personne = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

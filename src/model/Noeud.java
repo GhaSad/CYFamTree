@@ -96,4 +96,5 @@ public class Noeud {
     public Visibilite getVisibilite() {
         return visibilite;
     }
+    
 }

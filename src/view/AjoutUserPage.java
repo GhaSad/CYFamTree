@@ -42,7 +42,7 @@ public class AjoutUserPage {
         Button ajouterBtn = new Button("Ajouter à l’arbre");
         ajouterBtn.setDisable(true);
 
-        Utilisateur[] cibleTrouvee = new Utilisateur[1]; // hack pour accès dans lambda
+        Utilisateur[] cibleTrouvee = new Utilisateur[1]; // permet d'accéder dans la lambda
 
         Button rechercherBtn = new Button("Rechercher");
         rechercherBtn.setOnAction(e -> {
@@ -82,14 +82,28 @@ public class AjoutUserPage {
                 return;
             }
 
-            Lien lien = new Lien(utilisateurCourant, cible, typeLien);
-            utils.ValidationResult result = lien.estValideAvancee();
+            // Construire le lien
+            Lien lien;
+            switch (typeLien) {
+                case FILS, FILLE -> lien = new Lien(utilisateurCourant, cible, typeLien); // utilisateur = parent
+                case PERE, MERE -> lien = new Lien(cible, utilisateurCourant, typeLien);  // utilisateur = enfant
+                case FRERE, SOEUR -> lien = new Lien(utilisateurCourant, cible, typeLien); // fratrie
+                default -> {
+                    new Alert(Alert.AlertType.ERROR, "Type de lien non supporté.").show();
+                    return;
+                }
+            }
+
+            // Vérification avancée sur l’arbre de l’utilisateur courant
+            model.ArbreGenealogique arbre = utilisateurCourant.getArbre();
+            utils.ValidationResult result = lien.estValideAvancee(arbre);
 
             if (!result.isValide()) {
                 new Alert(Alert.AlertType.ERROR, result.getMessage()).show();
                 return;
             }
 
+            // Envoi de la demande par mail
             EmailService.envoyerEmail(
                     cible.getEmail(),
                     "CYFamTree - Demande de lien de parenté",

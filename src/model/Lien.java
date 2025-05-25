@@ -41,7 +41,7 @@ public class Lien {
      *
      * @return Un objet ValidationResult indiquant si le lien est valide ou non.
      */
-    public utils.ValidationResult estValideAvancee() {
+    public utils.ValidationResult estValideAvancee(model.ArbreGenealogique arbre) {
         Personne source = this.getSource();
         Personne lie = this.getPersonneLiee();
 
@@ -65,9 +65,15 @@ public class Lien {
         switch (this.typeLien) {
             case PERE:
             case MERE:
-                if (lie.getId() > 0 && dao.LienDAO.aDejaDeuxParents(lie.getId())) {
-                    return new utils.ValidationResult(false, "Cette personne a déjà deux parents définis.");
-                }
+            	Noeud cibleNoeud = arbre.getNoeudParPersonne(lie); // récupère le nœud cible dans l’arbre
+
+            	if (cibleNoeud != null) {
+            	    long nbParents = cibleNoeud.getParents().size();
+            	    if (nbParents >= 2) {
+            	        return new utils.ValidationResult(false, "Cette personne a déjà deux parents définis.");
+            	    }
+            	}
+
                 if (!source.getDateNaissance().isBefore(lie.getDateNaissance())) {
                     return new utils.ValidationResult(false, "Le parent doit être plus âgé que l'enfant.");
                 }

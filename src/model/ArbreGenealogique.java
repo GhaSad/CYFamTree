@@ -287,25 +287,89 @@ public class ArbreGenealogique {
     }
     public void afficherArbreCompletDepuisToutesRacines() {
         Set<Personne> visites = new HashSet<>();
+        Set<String> couplesAffiches = new HashSet<>();
         System.out.println("=== Arbre généalogique complet ===");
 
+        // 1. Trouver toutes les racines possibles (personnes sans parents)
+        List<Personne> racines = new ArrayList<>();
         for (Noeud noeud : listeNoeuds) {
             Personne personne = noeud.getPersonne();
-            if (getParents(personne).isEmpty() && !visites.contains(personne)) {
-                afficherDescendants(personne, 0, visites);
+            if (getParents(personne).isEmpty()) {
+                racines.add(personne);
+            }
+        }
+
+        // 2. Trier les racines par profondeur généalogique descendante (pour afficher les ancêtres d’abord)
+        racines.sort(Comparator.comparingInt(p -> profondeurDepuis(p, new HashSet<>()) * -1));
+
+        // 3. Afficher chaque sous-arbre à partir de la racine
+        for (Personne racine : racines) {
+            if (!visites.contains(racine)) {
+                afficherDescendants(racine, 0,visites, couplesAffiches);
             }
         }
     }
 
-    private void afficherDescendants(Personne personne, int niveau, Set<Personne> visites) {
-        if (!visites.add(personne)) return;
+    private int profondeurDepuis(Personne personne, Set<Personne> visites) {
+        if (!visites.add(personne)) return 0;
+        int max = 0;
+        for (Personne enfant : getEnfants(personne)) {
+            max = Math.max(max, profondeurDepuis(enfant, visites));
+        }
+        return 1 + max;
+    }
 
-        printIndent(niveau);
-        System.out.println(personne.getPrenom() + " " + personne.getNom());
+
+    private void afficherDescendants(Personne personne, int niveau, Set<Personne> visites, Set<String> couplesAffiches) {
+        if (visites.contains(personne)) return;
+
+        visites.add(personne);
+
+        List<Personne> parents = getParents(personne);
+
+        if (parents.size() == 2) {
+            int id1 = parents.get(0).getId();
+            int id2 = parents.get(1).getId();
+            String coupleKey = Math.min(id1, id2) + ":" + Math.max(id1, id2);
+
+            if (!couplesAffiches.contains(coupleKey)) {
+                couplesAffiches.add(coupleKey);
+
+                List<Personne> enfants = getEnfantsDeCouple(parents.get(0), parents.get(1));
+                if (!enfants.isEmpty()) {
+                    printIndent(niveau);
+                    System.out.print("Les enfants de " + parents.get(0).getPrenom() + " " + parents.get(0).getNom());
+                    System.out.print(" et " + parents.get(1).getPrenom() + " " + parents.get(1).getNom());
+                    System.out.print(" sont : ");
+                    for (int i = 0; i < enfants.size(); i++) {
+                        System.out.print(enfants.get(i).getPrenom() + " " + enfants.get(i).getNom());
+                        if (i < enfants.size() - 1) System.out.print(", ");
+                    }
+                    System.out.println(".");
+                }
+            }
+        } else if (parents.size() == 1) {
+            String key = parents.get(0).getId() + ":" + personne.getId();
+            if (!couplesAffiches.contains(key)) {
+                couplesAffiches.add(key);
+                printIndent(niveau);
+                System.out.println("L'enfant de " + parents.get(0).getPrenom() + " " + parents.get(0).getNom() + " est : " + personne.getPrenom() + " " + personne.getNom());
+            }
+        }
 
         for (Personne enfant : getEnfants(personne)) {
-            afficherDescendants(enfant, niveau + 1, visites);
+            afficherDescendants(enfant, niveau + 1, visites, couplesAffiches);
         }
+    }
+
+    private List<Personne> getEnfantsDeCouple(Personne p1, Personne p2) {
+        List<Personne> enfantsP1 = getEnfants(p1);
+        List<Personne> enfantsP2 = getEnfants(p2);
+        List<Personne> communs = new ArrayList<>();
+        for (Personne e : enfantsP1) {
+            if (enfantsP2.contains(e)) communs.add(e);
+        }
+        return communs;
     }
 
     

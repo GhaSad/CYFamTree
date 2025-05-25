@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.Period;
+import utils.ValidationResult;
 
 /** Interface permettant d'ajouter une personne manuellement dans l'arbre généalogique. */
 public class AjoutPersonnePage {
@@ -90,9 +91,18 @@ public class AjoutPersonnePage {
             Noeud source = utilisateur.getArbre().getNoeudParPersonne(sourcePersonne);
             if (source == null) {
                 Noeud nouveauSource = new Noeud(sourcePersonne);
+                try (Connection connTemp = Database.getConnection()) {
+                    NoeudDAO noeudDAOtemp = new NoeudDAO(connTemp);
+                    noeudDAOtemp.sauvegarderNoeud(nouveauSource, utilisateur.getArbre().getId());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    new Alert(Alert.AlertType.ERROR, "❌ Erreur lors de la sauvegarde du noeud source.").show();
+                    return;
+                }
                 utilisateur.getArbre().ajouterNoeud(nouveauSource);
                 source = nouveauSource;
             }
+
 
             try (Connection conn = Database.getConnection()) {
                 int idPersonne = PersonneDAO.sauvegarder(nouvellePersonne);
@@ -100,11 +110,24 @@ public class AjoutPersonnePage {
 
 
                 try {
-                    switch (lien) {
-                    case FILS, FILLE -> source.getPersonne().creerLien(nouvellePersonne, lien);  // source est le parent
-                    case PERE, MERE -> nouvellePersonne.creerLien(source.getPersonne(), lien);   // nouvellePersonne est le parent
-                    default -> throw new IllegalArgumentException("Type de lien non supporté.");
-                }
+                	Lien lienCree;
+
+                	
+                	switch (lien) {
+                	    case FILS, FILLE -> lienCree = new Lien(source.getPersonne(), nouvellePersonne, lien);  // source = parent
+                	    case PERE, MERE -> lienCree = new Lien(nouvellePersonne, source.getPersonne(), lien);   // source = enfant
+                	    default -> throw new IllegalArgumentException("Type de lien non supporté.");
+                	}
+
+                	// Valider le lien avec l'arbre
+                	utils.ValidationResult res = lienCree.estValideAvancee(utilisateur.getArbre());
+                	if (!res.isValide()) {
+                	    new Alert(Alert.AlertType.ERROR, res.getMessage()).show();
+                	    return;
+                	}
+                	// ➕ AJOUTE CE QUI SUIT :
+                	dao.LienDAO.sauvegarder(lienCree, conn);
+
                     
                 } catch (IllegalArgumentException ex) {
                     new Alert(Alert.AlertType.ERROR, ex.getMessage()).show();
@@ -115,23 +138,27 @@ public class AjoutPersonnePage {
                 NoeudDAO noeudDAO = new NoeudDAO(conn);
                 noeudDAO.sauvegarderNoeud(nouveauNoeud, utilisateur.getArbre().getId());
 
+                // Ajout dans l'arbre
                 if (utilisateur.getArbre().getNoeudParPersonne(nouvellePersonne) == null) {
                     utilisateur.getArbre().ajouterNoeud(nouveauNoeud);
                 }
-                utilisateur.ajouterNoeudAvecLien(nouveauNoeud, lien);
 
-                String sql = "INSERT INTO noeud_lien (id_parent, id_enfant, arbre_id) VALUES (?, ?, ?)";
-                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                    if (lien == TypeLien.FILS || lien == TypeLien.FILLE) {
-                        stmt.setInt(1, source.getId());
-                        stmt.setInt(2, nouveauNoeud.getId());
-                    } else if (lien == TypeLien.PERE || lien == TypeLien.MERE) {
-                        stmt.setInt(1, nouveauNoeud.getId());
-                        stmt.setInt(2, source.getId());
-                    }
-                    stmt.setInt(3, utilisateur.getArbre().getId());
-                    stmt.executeUpdate();
+                // Crée la relation logique (en mémoire)
+                if (lien == TypeLien.FILS || lien == TypeLien.FILLE) {
+                    source.ajouterEnfant(nouveauNoeud);
+                } else if (lien == TypeLien.PERE || lien == TypeLien.MERE) {
+                    nouveauNoeud.ajouterEnfant(source);
                 }
+
+                // Enregistre la relation en base via NoeudDAO
+                noeudDAO.enregistrerLienParentEnfant(
+                    (lien == TypeLien.FILS || lien == TypeLien.FILLE) ? source : nouveauNoeud,
+                    (lien == TypeLien.FILS || lien == TypeLien.FILLE) ? nouveauNoeud : source,
+                    utilisateur.getArbre().getId()
+                );
+
+
+                
 
                 new Alert(Alert.AlertType.INFORMATION, "Personne ajoutée avec succès !").show();
                 utilisateur.setArbre(dao.ArbreDAO.chargerArbreParUtilisateur(utilisateur));
