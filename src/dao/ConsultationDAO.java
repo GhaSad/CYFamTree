@@ -1,6 +1,7 @@
 package dao;
 
 import model.Consultation;
+
 import model.Utilisateur;
 
 import java.sql.*;
